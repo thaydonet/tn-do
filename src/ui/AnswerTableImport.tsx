@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { FileUp } from 'lucide-react';
 import type { AnswerDocument } from '../domain/schemas';
-import { answerTableRows, detectAnswerTableLayout, exportAnswerMatrix, mapAnswerMatrix, mapRows, readAnswerTable, type AnswerTable, type AnswerTableLayout, type ColumnMap } from '../domain/import-service';
+import { answerTableRows, detectAnswerTableLayout, exportAnswerMatrix, mapAnswerMatrix, mapMixedAnswerTable, mapRows, readAnswerTable, type AnswerTable, type AnswerTableLayout, type ColumnMap } from '../domain/import-service';
 import { useTask } from './context';
 
 export function AnswerTableImport({ document, onApply }: { document: AnswerDocument; onApply: (value: AnswerDocument) => void }) {
   const { run, busy } = useTask();
   const [table, setTable] = useState<AnswerTable | null>(null), [layout, setLayout] = useState<AnswerTableLayout>('matrix');
   const [map, setMap] = useState<ColumnMap>({ code: 'exam_code', number: 'number', answer: 'correct_answer', points: 'points' });
-  const mapping = table ? layout === 'matrix' ? mapAnswerMatrix(table, document.exam) : mapRows(answerTableRows(table), map, document.exam) : null;
+  const mixed = document.answer_sheets.some(sheet => sheet.sections.some(s => s.type !== 'mcq'));
+  const mapping = table ? mixed ? mapMixedAnswerTable(table, document, layout === 'rows' ? map : undefined) : layout === 'matrix' ? mapAnswerMatrix(table, document.exam) : mapRows(answerTableRows(table), map, document.exam) : null;
   const rowCount = table?.rows.filter(row => row.some(cell => cell.trim())).length ?? 0;
   return <>
     <div className="actions">
@@ -19,7 +20,7 @@ export function AnswerTableImport({ document, onApply }: { document: AnswerDocum
       <button className="text-button" onClick={() => exportAnswerMatrix(document, 'xlsx')}>Tải tệp mẫu XLSX</button>
       <button className="text-button" onClick={() => exportAnswerMatrix(document, 'csv')}>Tải CSV</button>
     </div>
-    <p className="helper">Hàng đầu là mã đề; cột đầu là số câu. Ví dụ: Câu, 984, 605, 900, 134. Các ô còn lại chứa đáp án A–D.</p>
+    <p className="helper">{mixed ? 'Tải tệp mẫu theo cấu hình ba phần hiện tại. Số câu II.1–II.8 / III.1–III.6; đúng–sai nhập TFTF hoặc ĐSĐS theo a–d; trả lời ngắn nhập số. Giữ đủ câu để tránh mất đáp án và giữ điểm đã cấu hình.' : 'Hàng đầu là mã đề; cột đầu là số câu. Ví dụ: Câu, 984, 605, 900, 134. Các ô còn lại chứa đáp án A–D.'}</p>
     {table && <>
       <label>Bố cục tệp<select value={layout} onChange={e => setLayout(e.target.value as AnswerTableLayout)}>
         <option value="matrix">Hàng đầu là mã đề, cột đầu là số câu</option>

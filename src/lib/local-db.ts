@@ -28,7 +28,7 @@ export const emptyWorkspace = (): Workspace => ({ classes: [], students: [], exa
 export async function loadLocal(): Promise<Workspace> {
   const saved: Workspace | undefined = await (await db).get('workspace', 'local');
   if (!saved) return emptyWorkspace();
-  for (const template of initialTemplates) if (!saved.templates.some(t => t.id === template.id)) saved.templates.push(structuredClone(template));
+  for (const template of initialTemplates) if (!saved.templates.some(t => t.id === template.id && t.version === template.version)) saved.templates.push(structuredClone(template));
   return saved;
 }
 export async function saveLocal(value: Workspace) { await (await db).put('workspace', value, 'local'); }

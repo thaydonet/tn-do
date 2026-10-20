@@ -32,7 +32,7 @@ try {
   await page.getByRole('button', { name: 'Lưu kỳ thi', exact: true }).click();
   await page.getByRole('dialog').waitFor({ state: 'hidden' });
   await page.getByRole('button', { name: 'Chấm phiếu →' }).click();
-  await page.getByLabel('Tôi chọn sử dụng mẫu thử nghiệm').check();
+  await page.getByLabel('Tôi xác nhận sử dụng phiên bản mẫu phiếu này').check();
   const examId = await page.locator('.scan-config select').inputValue();
   const png = await readFile('public/fixtures/sheet-20-clean.png'), qr = await QRCode.toDataURL(JSON.stringify({ schema_version: '1.0', exam_id: examId, template_id: template.id, template_version: 1, student_number: '000001', exam_code: '101' }), { errorCorrectionLevel: 'M', margin: 4, scale: 4 });
   const combined = await page.evaluate(async ({ source, qr, region }) => {
@@ -86,7 +86,7 @@ try {
   const mixedDownload = page.waitForEvent('download'); await page.getByRole('link', { name: 'Tải PDF A4', exact: true }).click();
   assert.equal((await mixedDownload).suggestedFilename(), 'TNDO-3P-2026.pdf');
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
-  console.log('PASS three-part TN - DO design is visible, downloadable as A4 PDF, and separate from automatic MCQ grading');
+  console.log('PASS three-part TN - DO design is visible and downloadable as A4 PDF');
   // A fresh workspace must allow creating an exam before any class exists.
   const emptyContext = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   try {
@@ -106,6 +106,82 @@ try {
     assert.match(await fresh.locator('.exam-card').innerText(), /Không giới hạn lớp/);
     assert.match(await fresh.locator('.exam-meta').innerText(), /10\s*câu hỏi/);
     console.log('PASS empty workspace creates 10-question exam on 40-question sheet without a class');
+    await fresh.getByRole('button', { name: 'Tạo kỳ thi', exact: true }).first().click();
+    await fresh.getByLabel('Tên kỳ thi', { exact: true }).fill('Kỳ thi TN - DO 2026');
+    await fresh.getByLabel('Mẫu phiếu / phiên bản').selectOption({ label: 'TN - DO 2026 · v2' });
+    await fresh.getByText('chấm ba phần: tối đa 40 câu', { exact: false }).waitFor();
+    await fresh.getByRole('button', { name: 'Thêm phần II và III', exact: false }).click();
+    await fresh.getByLabel('Sửa mã đề', { exact: true }).fill('0101');
+    const numericKeys = ['-1.25','0.5','1234','-9999','12.3','0'];
+    for (let i=0;i<numericKeys.length;i++) await fresh.getByLabel('Đáp án III.'+(i+1),{exact:true}).fill(numericKeys[i]);
+    await fresh.getByRole('button', { name: 'Lưu kỳ thi', exact: true }).click();
+    await fresh.getByRole('dialog').waitFor({ state: 'hidden' });
+    await fresh.reload();
+    await fresh.getByRole('navigation').first().getByRole('button', { name: 'Kỳ thi & đáp án', exact: true }).click();
+    const mixedExam = fresh.locator('.exam-card').filter({ hasText: 'Kỳ thi TN - DO 2026' });
+    await mixedExam.getByRole('button', { name: 'Mở đáp án' }).click();
+    assert.equal(await fresh.getByLabel('Mẫu phiếu / phiên bản').inputValue(), '7d0a2026-0003-4000-8000-000000000001:2');
+
+    assert.equal(await fresh.getByLabel('Đáp án II.1 a',{exact:true}).inputValue(),'T');
+    assert.equal(await fresh.getByLabel('Đáp án III.1',{exact:true}).inputValue(),'-1.25');
+    await fresh.setViewportSize({width:390,height:844});
+    assert.equal(await fresh.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
+    await fresh.setViewportSize({width:1440,height:1000});
+    await fresh.getByRole('button',{name:'Đóng',exact:true}).click();
+    await fresh.getByRole('navigation').first().getByRole('button',{name:'Lớp học',exact:true}).click();
+    await fresh.getByRole('button',{name:'Tạo lớp học',exact:true}).click();
+    await fresh.getByLabel('Tên lớp',{exact:true}).fill('Lớp ba phần');
+    await fresh.getByRole('button',{name:'Tạo lớp',exact:true}).click();
+    await fresh.getByPlaceholder('000001, Nguyễn Minh Anh\n000002, Trần Hoàng Nam').fill('00000001, Học sinh ba phần');
+    await fresh.getByRole('button',{name:'Xác nhận thêm',exact:true}).click();
+    await fresh.getByRole('cell',{name:'Học sinh ba phần',exact:true}).waitFor();
+    await fresh.getByRole('navigation').first().getByRole('button',{name:'Kỳ thi & đáp án',exact:true}).click();
+    await fresh.locator('.exam-card').filter({hasText:'Kỳ thi TN - DO 2026'}).getByRole('button',{name:'Chấm phiếu →'}).click();
+    await fresh.getByLabel('Tôi xác nhận sử dụng phiên bản mẫu phiếu này').check();
+    const mixedPng = await fresh.evaluate(async numericKeys => {
+      const {createMixedTemplate}=await import('/src/domain/templates.ts');
+      const t=createMixedTemplate(), image=new Image();
+      const svg=await (await fetch('/forms/TNDO-3P-2026.svg')).text();
+      const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'})); image.src=url; await image.decode();
+      const canvas=document.createElement('canvas'); canvas.width=t.width; canvas.height=t.height;
+      const ctx=canvas.getContext('2d'); ctx.drawImage(image,0,0); URL.revokeObjectURL(url);
+      const fill=b=>{ctx.fillStyle='#000';ctx.beginPath();ctx.arc(b.x*t.width,b.y*t.height,b.radius*t.width*.92,0,Math.PI*2);ctx.fill();};
+      t.questions.slice(0,20).forEach(q=>fill(q.bubbles[0]));
+      t.questions.filter(q=>q.number>=41&&q.number<=44).forEach(q=>q.true_false_items.forEach((item,i)=>fill(q.number===41&&i===3?item.false:item.true)));
+      for(let i=0;i<numericKeys.length;i++){
+        const q=t.questions.find(q=>q.number===49+i).short_answer, value=numericKeys[i], unsigned=value.replace('-','');
+        [...unsigned.replace('.','')].forEach((d,col)=>fill(q.columns[col][Number(d)]));
+        if(value.startsWith('-'))fill(q.negative);
+        if(unsigned.includes('.'))fill(q.decimal[unsigned.indexOf('.')-1]);
+      }
+      // One ambiguous digit must be corrected before saving.
+      fill(t.questions.find(q=>q.number===50).short_answer.columns[0][1]);
+      for(const [region,value] of [[t.student_region,'00000001'],[t.code_region,'0101']]) [...value].forEach((d,col)=>fill(region[col][Number(d)]));
+      return canvas.toDataURL('image/png').split(',')[1];
+    }, numericKeys);
+    await fresh.locator('.analyzer input[type=file]').first().setInputFiles({name:'mixed-three-part.png',mimeType:'image/png',buffer:Buffer.from(mixedPng,'base64')});
+    await fresh.getByText('Đã tìm thấy 4 mốc.',{exact:false}).waitFor({timeout:25000});
+    await fresh.getByLabel('Cho phép không có QR').check();
+    await fresh.getByRole('button',{name:'Căn chỉnh & nhận diện',exact:true}).click();
+    await fresh.getByText('Đã nhận diện 30 câu',{exact:false}).waitFor({timeout:25000});
+    assert.equal(await fresh.locator('.recognition-row').count(),30);
+    assert.equal(await fresh.getByLabel('Câu II.1 d',{exact:true}).inputValue(),'F');
+    assert.equal(await fresh.getByLabel('Câu III.1',{exact:true}).inputValue(),'-1.25');
+    await fresh.setViewportSize({width:390,height:844});
+    assert.equal(await fresh.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
+    await fresh.getByLabel('Câu III.2',{exact:true}).fill('0.5');
+    await fresh.setViewportSize({width:1440,height:1000});
+    assert.match(await fresh.locator('.score-preview').innerText(),/9,5/);
+    await fresh.getByLabel('Tôi đã đối chiếu học sinh').check();
+    await fresh.getByRole('button',{name:'Xác nhận & lưu kết quả',exact:true}).click();
+    await fresh.getByText('Đã lưu ảnh và kết quả chấm',{exact:true}).waitFor();
+    await fresh.getByRole('navigation').first().getByRole('button',{name:'Kết quả & báo cáo',exact:true}).click();
+    await fresh.getByRole('button',{name:'Xem bài của Học sinh ba phần'}).click();
+    await fresh.getByText('Câu II.1:',{exact:false}).waitFor();
+    assert.match(await fresh.locator('.detail-answers').innerText(),/III.1: -1.25/);
+    assert.match(await fresh.locator('.score-preview').innerText(),/9.5/);
+    console.log('PASS three-part editor, actual printed SVG + OpenCV, partial TF scoring, signed decimals, manual correction and saved report');
+
   } finally { await emptyContext.close(); }
   assert.deepEqual(errors, []);
 } catch (error) { await page.screenshot({ path: 'artifacts/browser-failure.png', fullPage: true }); console.error(error.message); console.error('Browser errors:', errors); process.exitCode = 1; }

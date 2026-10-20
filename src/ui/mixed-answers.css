@@ -1,0 +1,9 @@
+.tf-answer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.tf-answer-cell{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:12px;border:1px solid var(--line);border-radius:8px}
+.tf-answer-cell>strong{grid-column:1/-1}.tf-answer-cell label{margin:0}.tf-answer-cell select{padding:7px 4px}
+.tf-review-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;flex:1;min-width:0}
+.tf-review-options label{margin:0;font-size:10px}.tf-review-options select{padding:5px 2px;font-size:10px}
+.numeric-review{flex:1;min-width:0}.numeric-review input{max-width:160px}.mark-label.partial{color:#9a7d48}
+.numeric-answer-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.numeric-answer-grid .answer-cell input{border:0;box-shadow:none;background:none}
+.notice>.button{display:flex;margin-top:10px;white-space:normal}.recognition-row .question-number{width:32px}
+@media(max-width:600px){.recognition-row{flex-wrap:wrap}.tf-review-options{flex-basis:70%}.tf-answer-grid{grid-template-columns:1fr}}

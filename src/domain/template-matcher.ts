@@ -3,7 +3,10 @@ export function matchTemplate(templates: SheetTemplate[], id: string | undefined
   if (!id || !version) throw new Error('Phải chọn mẫu phiếu và phiên bản; không tự suy đoán');
   const t = templates.find(t => t.id === id && t.version === version);
   if (!t) throw new Error('Không tìm thấy đúng phiên bản mẫu phiếu');
-  if (document && document.answer_sheets.some(s => { const qs = s.sections.flatMap(section => section.questions.map(q => ({ ...q, choices: section.choices }))); return qs.length > t.questions.length || qs.some(q => t.questions.find(tq => tq.number === q.number)?.bubbles.length !== q.choices); })) throw new Error('Số câu vượt sức chứa phiếu hoặc lựa chọn không khớp mẫu phiếu');
+  if (document && document.answer_sheets.some(s => s.sections.some(section => section.questions.some(q => {
+    const target = t.questions.find(tq => tq.number === q.number);
+    return !target || target.section !== section.type || (section.type === 'mcq' && target.bubbles.length !== section.choices);
+  })))) throw new Error('Số câu vượt sức chứa phiếu hoặc loại câu / lựa chọn không khớp mẫu phiếu');
   return t;
 }
 export function checkQR(qr: SheetQR, examId: string, template: SheetTemplate) {

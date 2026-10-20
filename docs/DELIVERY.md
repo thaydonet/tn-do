@@ -6,7 +6,7 @@
 
 - Đổi thương hiệu thành **TN - DO** trong giao diện, tiêu đề trang, package và tài liệu. Chỉ ghi nhận ý tưởng từ TNMaker tại trang giới thiệu; không dùng ảnh tham chiếu hay logo của nguồn đó trong phiếu in.
 - Thiết kế riêng `TNDO-A20` (2 nhóm) và `TNDO-A40` (4 nhóm), QR cuối trang. Có PDF/SVG A4, fixtures được tạo từ chính bản thiết kế để kiểm tra OMR.
-- Thêm **TNDO-3P-2026**, gồm 40 câu trắc nghiệm, 8 câu đúng–sai × 4 ý và 6 câu trả lời ngắn × 4 cột số. Có PDF/SVG/PNG và JSON tọa độ tại `public/forms`. Mẫu này phục vụ in; bộ chấm đúng–sai/trả lời ngắn chưa được tích hợp, không được đưa vào bộ chọn chấm MCQ.
+- Thêm **TNDO-3P-2026**, gồm 40 câu trắc nghiệm, 8 câu đúng–sai × 4 ý và 6 câu trả lời ngắn × 4 cột số. Có PDF/SVG/PNG và JSON tọa độ tại `public/forms`. Phiên bản nhận diện v2 hỗ trợ chấm cả ba phần, nhập đáp án trực tiếp / JSON / Excel / CSV, xác minh ô tô và lưu điểm trên Supabase. Cần áp dụng migration 202610200002; xem THREE_PART_GRADING.md.
 - Giữ dữ liệu và ảnh cũ qua bước chuyển IndexedDB, giữ phiên bản template cũ bất biến; mẫu mới có ID riêng.
 - Cấu hình Supabase đã được đọc từ dữ liệu người dùng nhập và chuyển sang `.env` được bỏ qua trong Git. Auth HTTP 200, email bật; bảng mẫu và năm RPC chính phản hồi đúng trạng thái từ chối khóa ẩn danh. Chưa dùng tài khoản thật để kiểm tra upload hoặc chạy SQL quản trị.
 - Đã đăng ký Site riêng tư tên TN - DO tại `https://tn-do.livelyboot512.chatgpt.site`. Phản hồi xuất bản được ghi riêng vào `artifacts/deployment.json` để phân biệt đăng ký với triển khai thành công.

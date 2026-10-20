@@ -32,6 +32,14 @@ export async function saveTemplate(orgId: string, template: SheetTemplate) {
 }
 export async function seedCloudTemplates(orgId: string) {
   const w = await loadWorkspace(orgId);
-  for (const t of emptyWorkspace().templates) if (!w.templates.some(existing => existing.code === t.code)) await saveTemplate(orgId, { ...t, id: crypto.randomUUID() });
+  for (const t of emptyWorkspace().templates) {
+    const existing = latest(w.templates.filter(saved => saved.code === t.code))[0];
+    if (!existing || existing.version < t.version) {
+      const targetId = existing?.id ?? crypto.randomUUID();
+      // Install intermediate versions in order for an organization that has no copy yet.
+      if (!existing && t.code === 'TNDO-3P-2026' && t.version === 2) await saveTemplate(orgId, { ...t, id: targetId, version: 1, questions: t.questions.filter(q => q.section === 'mcq'), test_note: 'Nhận diện phần I trắc nghiệm.' });
+      await saveTemplate(orgId, { ...t, id: targetId });
+    }
+  }
 }
 export function latest<T extends { id: string; version: number }>(items: T[]): T[] { return [...new Map([...items].sort((a, b) => a.version - b.version).map(t => [t.id, t])).values()]; }

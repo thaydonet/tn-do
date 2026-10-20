@@ -7,7 +7,7 @@
   "name": "TN - DO · 2026 · 40 trắc nghiệm / 8 đúng–sai / 6 trả lời ngắn",
   "width": 1200,
   "height": 1697,
-  "grading_support": "print_only",
+  "grading_support": "three_part",
   "anchors": [
     {
       "x": 0.035,

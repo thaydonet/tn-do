@@ -1,9 +1,22 @@
 import type { SheetTemplate } from './schemas';
+import { createMixedSheet, renderMixedSheetSVG } from './mixed-sheet';
 
 const escape = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]!));
 
 /** Printable vector source; all OMR geometry comes from the selected immutable template. */
 export function renderSheetSVG(template: SheetTemplate): string {
+  if (template.code === 'TNDO-3P-2026' || template.code.startsWith('TNDO-3P-2026-COPY-')) {
+    const design = createMixedSheet();
+    return renderMixedSheetSVG({
+      ...design, width: template.width, height: template.height, anchors: template.anchors,
+      student_region: template.student_region ?? design.student_region,
+      code_region: template.code_region ?? design.code_region,
+      sections: { ...design.sections, mcq: design.sections.mcq.map(q => ({ ...q,
+        bubbles: q.bubbles.map(b => ({ ...b, ...template.questions.find(tq => tq.number === q.number)?.bubbles.find(tb => tb.label === b.label), label: b.label })),
+      })), true_false: design.sections.true_false.map(q => ({ ...q, items: template.questions.find(tq => tq.number === 40 + q.number)?.true_false_items ?? q.items })),
+      short_answer: design.sections.short_answer.map(q => ({ ...q, ...template.questions.find(tq => tq.number === 48 + q.number)?.short_answer })) },
+    });
+  }
   const t = template, w = t.width, h = t.height, elements: string[] = [];
   const text = (x: number, y: number, value: string, size = 17, extra = '') =>
     elements.push(`<text x="${x}" y="${y}" font-family="Arial,sans-serif" font-size="${size}" fill="#172f3a" ${extra}>${escape(value)}</text>`);

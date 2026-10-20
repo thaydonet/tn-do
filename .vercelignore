@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.git/
+.vercel/
+.env*
+.deploy/
+.openai/
+.npm-cache/
+.cache/
+artifacts/
+coverage/
+*.tsbuildinfo
+public/vendor/
+TN-MAKER-TN-2026.png

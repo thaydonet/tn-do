@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
@@ -19,7 +22,10 @@
     "check": "node scripts/check.mjs",
     "forms:mixed": "node scripts/mixed-sheet.mjs",
     "test:cloud": "node scripts/test-cloud-config.mjs",
-    "supabase:status": "node scripts/supabase-status.mjs"
+    "supabase:status": "node scripts/supabase-status.mjs",
+    "deploy:vercel": "node scripts/deploy-vercel.mjs",
+    "vercel:login": "node scripts/deploy-vercel.mjs --login",
+    "vercel:check": "node scripts/deploy-vercel.mjs --check"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",

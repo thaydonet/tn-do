@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { Camera, ScanLine, RotateCcw, Upload } from 'lucide-react';
 import type { Point, Recognition, SheetQR, SheetTemplate } from '../domain/schemas';
+import { questionBubbles } from '../domain/schemas';
 import { canvasBlob, detectAnchors, imageCanvas, preprocess } from '../domain/image-preprocessor';
 import { recognize, recognizeDigits } from '../domain/omr-engine';
 import { readQR } from '../domain/qr-reader';
@@ -16,7 +17,7 @@ export function SheetAnalyzer({ template, onAnalysis, onInvalidate, calibrate, o
     const canvas = ref.current, base = aligned ?? source; if (!canvas || !base) return;
     canvas.width = base.width; canvas.height = base.height; const ctx = canvas.getContext('2d')!; ctx.drawImage(base, 0, 0);
     if (aligned) {
-      for (const q of template.questions) for (const b of q.bubbles) { ctx.beginPath(); ctx.arc(b.x * base.width, b.y * base.height, b.radius * base.width, 0, Math.PI * 2); ctx.strokeStyle = '#00a78a'; ctx.lineWidth = 2; ctx.stroke(); }
+      for (const q of template.questions) for (const b of questionBubbles(q)) { ctx.beginPath(); ctx.arc(b.x * base.width, b.y * base.height, b.radius * base.width, 0, Math.PI * 2); ctx.strokeStyle = '#00a78a'; ctx.lineWidth = 2; ctx.stroke(); }
       for (const region of [template.student_region, template.code_region]) for (const col of region ?? []) for (const b of col) { ctx.beginPath(); ctx.arc(b.x * base.width, b.y * base.height, b.radius * base.width, 0, Math.PI * 2); ctx.strokeStyle = '#8f5fd1'; ctx.lineWidth = 1; ctx.stroke(); }
     } else corners.forEach((p, i) => { ctx.beginPath(); ctx.arc(p.x * base.width, p.y * base.height, 12, 0, Math.PI * 2); ctx.fillStyle = '#dc6c36'; ctx.fill(); ctx.font = 'bold 24px sans-serif'; ctx.fillText(String(i + 1), p.x * base.width + 18, p.y * base.height); });
   }, [source, aligned, corners, template]);

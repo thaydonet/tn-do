@@ -11,7 +11,7 @@ Mẫu mới theo cấu trúc ảnh tham chiếu của người dùng, với bố
 - [PNG xem trước](public/forms/TNDO-3P-2026.png)
 - [JSON bố cục](public/forms/TNDO-3P-2026.json)
 
-Mở **Mẫu phiếu** để xem và tải. In A4 ở tỷ lệ 100%, giữ nguyên bốn mốc góc. Mẫu ba phần hiện là **thiết kế để in**; chấm tự động phần đúng–sai và trả lời ngắn chưa được tích hợp. Nó được tách khỏi bộ chọn template chấm MCQ để tránh chấm sai loại câu. Tái tạo bằng `npm.cmd run forms:mixed`.
+Mở **Mẫu phiếu** để xem và tải. In A4 ở tỷ lệ 100%, giữ nguyên bốn mốc góc. Chọn **TN - DO 2026 · v2** khi tạo kỳ thi để chấm cả ba phần. Đúng–sai mặc định tính 10%/25%/50%/100% điểm câu theo 1/2/3/4 ý đúng; trả lời ngắn hỗ trợ số âm và thập phân. Xem [hướng dẫn chấm ba phần](docs/THREE_PART_GRADING.md), gồm migration Supabase và nhập Excel/CSV. Tái tạo phiếu in bằng `npm.cmd run forms:mixed`.
 
 Hai mẫu MCQ riêng: `public/forms/TNDO-A20.pdf` và `TNDO-A40.pdf` (kèm SVG). Các mẫu mới dùng UUID/mã mới; phiếu và bài chấm cũ không bị thay đổi tọa độ. IndexedDB có bước chuyển dữ liệu cũ sang `tn-do-v1`, giữ cả ảnh và bản chờ gửi.
 
@@ -26,6 +26,8 @@ Site đã đăng ký với tên **TN - DO**, địa chỉ `https://tn-do.livelyb
 Ứng dụng React 19 + TypeScript + Supabase để quản lý lớp, nhập đáp án nhiều mã đề, nhận diện phiếu bằng OpenCV.js và lưu kết quả sau khi giáo viên xác minh.
 
 ## Chạy tại máy
+
+Triển khai lên **Vercel** đã được cấu hình trong `vercel.json`. Chạy `npm.cmd run vercel:check`, đăng nhập bằng `npm.cmd run vercel:login`, rồi chạy `npm.cmd run deploy:vercel`. Lệnh deploy đồng bộ ba biến frontend từ `.env` vào Vercel và xuất bản Production; `.env` được bỏ qua khi upload. Hướng dẫn Git/CLI, Preview và Supabase redirect: [docs/VERCEL.md](docs/VERCEL.md).
 
 Yêu cầu Node.js 22.12+ (đã kiểm tra trên Node 24), npm và Chrome cho kiểm thử trình duyệt.
 

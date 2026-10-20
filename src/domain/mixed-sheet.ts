@@ -5,7 +5,7 @@ export const mixedSheetSchema = z.object({
   schema_version: z.literal('1.0'), kind: z.literal('three_part_print'),
   id: z.uuid(), code: z.literal('TNDO-3P-2026'), version: z.literal(1),
   name: z.string(), width: z.number().int().positive(), height: z.number().int().positive(),
-  grading_support: z.literal('print_only'),
+  grading_support: z.literal('three_part'),
   anchors: z.array(z.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) })).length(4),
   student_region: z.array(z.array(position.extend({ label: z.string() })).length(10)).length(8),
   code_region: z.array(z.array(position.extend({ label: z.string() })).length(10)).length(4),
@@ -21,7 +21,7 @@ export function createMixedSheet(): MixedSheetDesign {
   const digits = (count: number, x: number) => Array.from({ length: count }, (_, col) => Array.from({ length: 10 }, (_, digit) => ({ label: String(digit), x: x + col * .033, y: .137 + digit * .0105, radius: .0045 })));
   return mixedSheetSchema.parse({
     schema_version: '1.0', kind: 'three_part_print', id: '7d0a2026-0003-4000-8000-000000000001', code: 'TNDO-3P-2026', version: 1,
-    name: 'TN - DO · 2026 · 40 trắc nghiệm / 8 đúng–sai / 6 trả lời ngắn', width: 1200, height: 1697, grading_support: 'print_only',
+    name: 'TN - DO · 2026 · 40 trắc nghiệm / 8 đúng–sai / 6 trả lời ngắn', width: 1200, height: 1697, grading_support: 'three_part',
     anchors: [{ x: .035, y: .025 }, { x: .965, y: .025 }, { x: .965, y: .975 }, { x: .035, y: .975 }],
     student_region: digits(8, .46), code_region: digits(4, .81),
     sections: {

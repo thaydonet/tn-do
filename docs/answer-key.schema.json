@@ -52,7 +52,11 @@
               "properties": {
                 "type": {
                   "type": "string",
-                  "const": "mcq"
+                  "enum": [
+                    "mcq",
+                    "true_false",
+                    "short_answer"
+                  ]
                 },
                 "title": {
                   "default": "Trắc nghiệm",
@@ -64,6 +68,13 @@
                   "type": "integer",
                   "minimum": 2,
                   "maximum": 5
+                },
+                "scoring": {
+                  "type": "string",
+                  "enum": [
+                    "partial",
+                    "per_item"
+                  ]
                 },
                 "questions": {
                   "minItems": 1,
@@ -79,13 +90,8 @@
                       },
                       "correct_answer": {
                         "type": "string",
-                        "enum": [
-                          "A",
-                          "B",
-                          "C",
-                          "D",
-                          "E"
-                        ]
+                        "minLength": 1,
+                        "maxLength": 20
                       },
                       "points": {
                         "type": "number",

@@ -1,6 +1,7 @@
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { answerDocumentSchema, type AnswerDocument } from './schemas';
+import { questionLabel } from './answer-format';
 
 export type RawRow = Record<string, unknown>;
 export type ColumnMap = { code: string; number: string; answer: string; points: string };
@@ -105,7 +106,34 @@ function safeCell(value: unknown) { return typeof value === 'string' && /^[\s]*[
 export function answerMatrixCells(document: AnswerDocument): string[][] {
   const keys = document.answer_sheets.map(sheet => new Map(sheet.sections.flatMap(section => section.questions).map(q => [q.number, q.correct_answer])));
   const numbers = [...new Set(keys.flatMap(key => [...key.keys()]))].sort((a, b) => a - b);
-  return [['Câu', ...document.answer_sheets.map(sheet => sheet.exam_code)], ...numbers.map(number => [String(number), ...keys.map(key => key.get(number) ?? '')])];
+  const types = new Map(document.answer_sheets.flatMap(sheet => sheet.sections.flatMap(section => section.questions.map(q => [q.number, section.type] as const))));
+  return [['Câu', ...document.answer_sheets.map(sheet => sheet.exam_code)], ...numbers.map(number => [types.get(number) === 'mcq' ? String(number) : questionLabel(number, types.get(number)), ...keys.map(key => key.get(number) ?? '')])];
+}
+export function mapMixedAnswerTable(table: AnswerTable, document: AnswerDocument, map?: ColumnMap) {
+  const errors: RowIssue[] = [], seen = new Set<string>(), sheets = new Map<string, AnswerDocument['answer_sheets'][number]>();
+  const entries = map ? answerTableRows(table).map((row, i) => ({ row: i + 2, code: String(row[map.code] ?? '').trim(), number: String(row[map.number] ?? '').trim(), answer: String(row[map.answer] ?? '').trim(), points: String(row[map.points] ?? '').trim() })) : table.rows.flatMap((row, i) => table.headers.slice(1).map((code, col) => ({ row: i + 2, code: code.trim(), number: row[0]?.trim() ?? '', answer: row[col + 1]?.trim() ?? '', points: '' })));
+  if (!map && (new Set(table.headers.slice(1)).size !== table.headers.length - 1 || table.rows.some(row => row.slice(table.headers.length).some(Boolean)))) errors.push({ row: 1, message: 'Trùng mã đề hoặc có cột chưa khai báo mã đề' });
+  for (const entry of entries) {
+    if (!entry.number && !entry.answer) continue;
+    const numbered = /^(I{1,3})[.\s-](\d+)$/i.exec(entry.number);
+    if (numbered && (Number(numbered[2]) < 1 || Number(numbered[2]) > (numbered[1].toUpperCase() === 'II' ? 8 : numbered[1].toUpperCase() === 'III' ? 6 : 40))) { errors.push({ row: entry.row, message: 'Số câu vượt giới hạn phần đã ghi' }); continue; }
+    const number = numbered ? Number(numbered[2]) + (numbered[1].toUpperCase() === 'II' ? 40 : numbered[1].toUpperCase() === 'III' ? 48 : 0) : Number(entry.number);
+    const code = entry.code;
+    if (!/^[A-Za-z0-9_-]{1,20}$/.test(code)) { errors.push({ row: entry.row, message: 'Mã đề không hợp lệ' }); continue; }
+    let sheet = sheets.get(code);
+    if (!sheet) { sheet = structuredClone(document.answer_sheets.find(s => s.exam_code === code) ?? document.answer_sheets[0]); sheet.exam_code = code; sheets.set(code, sheet); }
+    const section = sheet.sections.find(s => s.questions.some(q => q.number === number)), q = section?.questions.find(q => q.number === number);
+    const key = `${code}:${number}`;
+    if (!q || !section || !entry.number) { errors.push({ row: entry.row, message: 'Số câu không có trong cấu hình ba phần (dùng II.1, III.1)' }); continue; }
+    if (seen.has(key)) errors.push({ row: entry.row, message: `Trùng câu ${entry.number}, mã đề ${code}` });
+    seen.add(key);
+    q.correct_answer = section.type === 'true_false' ? entry.answer.toUpperCase().replace(/[ĐD]/g, 'T').replace(/S/g, 'F') : section.type === 'mcq' ? entry.answer.toUpperCase() : entry.answer;
+    if (entry.points) q.points = Number(entry.points.replace(',', '.'));
+  }
+  for (const sheet of sheets.values()) for (const section of sheet.sections) for (const q of section.questions) if (!seen.has(`${sheet.exam_code}:${q.number}`)) errors.push({ row: 0, message: `Thiếu đáp án ${questionLabel(q.number, section.type)}, mã đề ${sheet.exam_code}` });
+  const parsed = answerDocumentSchema.safeParse({ ...document, answer_sheets: [...sheets.values()] });
+  if (!parsed.success) errors.push(...parsed.error.issues.map(issue => ({ row: 0, message: issue.message })));
+  return { errors, document: errors.length || !parsed.success ? null : parsed.data };
 }
 export function exportAnswerMatrix(document: AnswerDocument, format: 'csv' | 'xlsx') {
   const cells = answerMatrixCells(document).map(row => row.map(safeCell));

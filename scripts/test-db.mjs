@@ -159,5 +159,72 @@ try {
   }
   await test('class-bound exam still rejects a student from another class', () => fails(call(teacher, 'begin_submission', [org, id(400), exam.id, 1, studentB.id, '101']), /does not belong/));
   await test('viewer cannot create classless exams', () => fails(call(viewer, 'save_exam', [org, { ...exam, id: id(401), class_id: null }, false]), /Permission denied/));
+
+  // Mixed keys and server grading must agree with the browser, including partial credit.
+  const { createMixedTemplate } = await vite.ssrLoadModule('/src/domain/templates.ts');
+  const { addMixedSections } = await vite.ssrLoadModule('/src/domain/mixed-answers.ts');
+  const { grade } = await vite.ssrLoadModule('/src/domain/grading-engine.ts');
+  const mixedTemplate = { ...createMixedTemplate(), id: id(500) };
+  await call(admin, 'save_template', [org, { ...mixedTemplate, version: 1, questions: mixedTemplate.questions.slice(0,40) }]);
+  await call(admin, 'save_template', [org, mixedTemplate]);
+  const mixedDocument = addMixedSections(structuredClone(document));
+  mixedDocument.answer_sheets.forEach(sheet => {
+    sheet.sections[1].questions.forEach(q => { q.correct_answer = 'TFTF'; });
+    ['-1.25','0','12.3','1234','-9999','0.5'].forEach((answer,i) => { sheet.sections[2].questions[i].correct_answer = answer; });
+  });
+  const mixedExam = { ...exam, id: id(501), template_id: mixedTemplate.id, template_version: 2, document: mixedDocument };
+  await test('teacher saves three-part exam with four-item true-false and numeric keys', async () => {
+    await call(teacher, 'save_exam', [org, mixedExam, false]);
+    const saved = (await call(teacher,'get_workspace',[org])).exams.find(e => e.id === mixedExam.id);
+    assert.deepEqual(saved.document,mixedDocument);
+  });
+  await test('server rejects mixed sections on the immutable MCQ-only template version', () => fails(call(teacher,'save_exam',[org,{...mixedExam,id:id(502),template_version:1},false]), /Template/));
+  await test('server rejects malformed mixed keys and scoring metadata', async () => {
+    for (const change of [
+      d => { d.answer_sheets[0].sections[1].questions[0].correct_answer='ABCD'; },
+      d => { d.answer_sheets[0].sections[2].questions[0].correct_answer='12345'; },
+      d => { d.answer_sheets[0].sections[1].scoring='forged'; },
+      d => { d.answer_sheets[0].sections[1].questions[0].number=40; },
+      d => { d.answer_sheets[0].sections[2].questions[0].injected=true; },
+    ]) {
+      const invalid=structuredClone(mixedDocument); change(invalid);
+      await fails(call(teacher,'save_exam',[org,{...mixedExam,version:2,document:invalid},true]),/Invalid|Unsupported|Mixed|Unknown/);
+    }
+  });
+  await test('server validates true-false and digit geometry before saving a template version', async () => {
+    const invalid=structuredClone(mixedTemplate); invalid.version=3; invalid.questions[48].short_answer.columns[0][1].label='0';
+    await fails(call(admin,'save_template',[org,invalid]),/Invalid short-answer digit/);
+  });
+  const mixedMarks=mixedDocument.answer_sheets[0].sections.flatMap(section => section.questions.map(q => ({number:q.number,selected:[q.correct_answer],state:'marked',confidence:1,ratios:[],reviewed:true})));
+  ['FTFT','TTFT','TFFT','TFTT'].forEach((answer,i) => { mixedMarks.find(m => m.number===41+i).selected=[answer]; });
+  mixedMarks.find(m=>m.number===49).selected=['-1,25'];
+  mixedMarks.find(m=>m.number===50).selected=['-0.00'];
+  const mixedDraft=await call(teacher,'begin_submission',[org,id(503),mixedExam.id,1,student.id,'101']);
+  await as(teacher,()=>db.query("insert into storage.objects(bucket_id,name) values('answer-sheets',$1),('answer-sheets',$2)",[mixedDraft.original_path,mixedDraft.processed_path]));
+  await test('server refuses unresolved or malformed mixed recognition',async()=>{
+    for (const [number,value,state] of [[41,'TF?F','marked'],[49,'1e2','marked'],[49,'1.25','review']]) {
+      const bad=structuredClone(mixedMarks); const row=bad.find(m=>m.number===number); row.selected=[value]; row.state=state;
+      await fails(call(teacher,'finalize_submission',[mixedDraft.id,bad]),/Invalid|Review all/);
+    }
+  });
+  await test('server grades three parts with partial credit and numeric normalization, ignoring forged earned points',async()=>{
+    const forged=mixedMarks.map(m=>({...m,earned:100,status:'correct',points:100}));
+    const saved=await call(teacher,'finalize_submission',[mixedDraft.id,forged]), expected=grade(mixedDocument,'101',mixedMarks);
+    assert.equal(saved.score,expected.score);
+    assert.deepEqual(saved.answers.map(a=>[a.number,a.status,a.earned]),expected.answers.map(a=>[a.number,a.status,a.earned]));
+    assert.ok(saved.answers.some(a=>a.status==='partial'));
+  });
+  await test('regrading mixed answers keeps history and applies the new true-false weighting',async()=>{
+    const changed=structuredClone(mixedExam); changed.version=2;
+    changed.document.answer_sheets.forEach(sheet=>{sheet.sections[1].scoring='per_item';});
+    await call(teacher,'save_exam',[org,changed,true]);
+    await call(teacher,'regrade_submission',[mixedDraft.id,org,2,1,'Updated mixed scoring rule']);
+    const saved=(await call(teacher,'get_workspace',[org])).submissions.find(s=>s.id===mixedDraft.id);
+    assert.equal(saved.score,grade(changed.document,'101',mixedMarks).score);
+    assert.equal(saved.history.length,2);
+    assert.equal(saved.history[0].score,grade(mixedDocument,'101',mixedMarks).score);
+  });
+  await test('mixed grading helpers remain inaccessible to browser clients',()=>fails(as(teacher,()=>db.query("select public.valid_short_answer('1')")),/permission denied/i));
+
   console.log(`\n${count} PostgreSQL/RLS integration checks passed.`);
-} catch (error) { console.error('DB CHECK FAILED:', error.message, error.detail ?? '', 'position', error.position ?? ''); process.exitCode = 1; } finally { await vite.close(); await db.close(); }
+} catch (error) { console.error('DB CHECK FAILED:', error.message, error.detail ?? '', 'position', error.position ?? '', 'internal', error.internalPosition ?? '', error.where ?? ''); process.exitCode = 1; } finally { await vite.close(); await db.close(); }
