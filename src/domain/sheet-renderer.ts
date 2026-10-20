@@ -1,10 +1,12 @@
 import type { SheetTemplate } from './schemas';
 import { createMixedSheet, renderMixedSheetSVG } from './mixed-sheet';
+import { renderLargePrintSVG } from './large-print-sheet';
 
 const escape = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]!));
 
 /** Printable vector source; all OMR geometry comes from the selected immutable template. */
 export function renderSheetSVG(template: SheetTemplate): string {
+  if (template.print_layout === 'a4-25mm') return renderLargePrintSVG(template);
   if (template.code === 'TNDO-3P-2026' || template.code.startsWith('TNDO-3P-2026-COPY-')) {
     const design = createMixedSheet();
     return renderMixedSheetSVG({

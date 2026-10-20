@@ -1,6 +1,6 @@
 import type { Point, SheetTemplate } from './schemas';
 
-export const CAMERA_GUIDE_SIZE = .065;
+export const CAMERA_GUIDE_SIZE = .065 * 3;
 export function cameraTargets(template: Pick<SheetTemplate, 'anchors'>): Point[] {
   return template.anchors.map(p => ({ x: .07 + .86 * p.x, y: .07 + .86 * p.y }));
 }

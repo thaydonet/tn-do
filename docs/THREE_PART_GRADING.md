@@ -1,5 +1,17 @@
 # Chấm phiếu TN - DO 2026 ba phần
 
+## Bộ phiếu A4 lề 2,5 cm, ô tô lớn
+
+Bộ in mới gồm **TNDO-A20 v2**, **TNDO-A40 v2** và **TNDO-3P-2026 v3**. Bốn ô vuông định vị trên camera có cạnh lớn gấp 3. Trên cả ba mẫu in, mốc đen có cạnh 5,25 mm (gấp 1,5); đường kính ô tô SBD/mã đề tăng gấp đôi: 4,872 mm cho phiếu 20/40 câu, 3,78 mm cho phiếu ba phần. Các hàng/cột đã được giãn và bố trí lại, không chồng ô. Mọi tọa độ OMR dùng cùng nguồn với bản in.
+
+PDF A4 có sẵn lề **trên, dưới, trái, phải 25 mm**, tính đến mép ngoài bốn mốc đen. Khi in chọn **A4, tỷ lệ 100%**, không thêm lề hoặc co vừa trang lần nữa. Tải [phiếu 20 câu](../public/forms/TNDO-A20.pdf), [phiếu 40 câu](../public/forms/TNDO-A40.pdf), [phiếu ba phần](../public/forms/TNDO-3P-2026.pdf). Có bản kèm phiên bản `-v2` / `-v3`, SVG, PNG và JSON cấu hình nhận diện trong `public/forms/`.
+
+Với Supabase, áp dụng thêm `supabase/migrations/202610200003_large_print_templates.sql` sau các migration trước, rồi bấm **Thêm bộ phiếu TN - DO…** trong thư viện mẫu hoặc **Bổ sung mẫu phiếu…** trong màn hình tạo kỳ thi. Chọn đúng **20/40 câu v2** hoặc **TN - DO 2026 v3** trước khi dùng bản in mới. Dữ liệu cục bộ tự bổ sung phiên bản mới. Tọa độ phiên bản cũ và kỳ thi đã có được giữ nguyên; phiếu in cũ phải chấm với cấu hình cũ. Phiên bản mới là bản nháp cho đến khi kiểm thử ảnh thực và kích hoạt; có thể xác nhận dùng bản nháp tại màn hình chấm để kiểm tra.
+
+Tạo lại cả ba bộ in bằng `npm.cmd run forms:print` (`forms:mixed` cũng chạy cùng bộ tạo). Kiểm tra hình học bằng `npm.cmd run test:print`: đọc trực tiếp PNG đã xuất, kiểm tra lề, phiếu trắng, toàn bộ đáp án và SBD/mã đề trên ảnh thẳng và ảnh nghiêng. `npm.cmd run test:camera` dùng mẫu 20 câu v2 mới để kiểm tra chấm liên tục.
+
+## Phiên bản ba phần trước đây
+
 Áp dụng migration `supabase/migrations/202610200002_three_part_grading.sql` sau các migration trước đó, rồi deploy frontend. Trong cửa sổ tạo kỳ thi hoặc thư viện mẫu, quản trị viên bấm **Bổ sung mẫu phiếu TN - DO còn thiếu** để thêm phiên bản v2. Kỳ thi đã dùng v1 vẫn giữ nguyên cấu hình và lịch sử điểm.
 
 Chọn **TN - DO 2026 · v2**, bấm **Thêm phần II và III**, rồi nhập đáp án. Cấu hình ban đầu phân bổ 30% điểm cho phần I, 40% cho phần II và 30% cho phần III. Có thể đổi số câu và điểm mỗi câu; tổng điểm từng mã đề phải bằng thang điểm.

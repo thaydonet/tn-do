@@ -11,9 +11,9 @@ Mẫu mới theo cấu trúc ảnh tham chiếu của người dùng, với bố
 - [PNG xem trước](public/forms/TNDO-3P-2026.png)
 - [JSON bố cục](public/forms/TNDO-3P-2026.json)
 
-Mở **Mẫu phiếu** để xem và tải. In A4 ở tỷ lệ 100%, giữ nguyên bốn mốc góc. Chọn **TN - DO 2026 · v2** khi tạo kỳ thi để chấm cả ba phần. Đúng–sai mặc định tính 10%/25%/50%/100% điểm câu theo 1/2/3/4 ý đúng; trả lời ngắn hỗ trợ số âm và thập phân. Xem [hướng dẫn chấm ba phần](docs/THREE_PART_GRADING.md), gồm migration Supabase và nhập Excel/CSV. Tái tạo phiếu in bằng `npm.cmd run forms:mixed`.
+Mở **Mẫu phiếu** để xem và tải. Bộ mới có lề 2,5 cm bốn phía, mốc đen lớn ×1,5 và đường kính ô tô SBD/mã đề lớn ×2. In A4 ở tỷ lệ 100%, không thêm lề/co vừa trang lần nữa. Chọn **TN - DO 2026 · v3** khi tạo kỳ thi với bản in mới (v2 vẫn dùng bố cục cũ). Đúng–sai mặc định tính 10%/25%/50%/100% điểm câu theo 1/2/3/4 ý đúng; trả lời ngắn hỗ trợ số âm và thập phân. Xem [hướng dẫn chấm ba phần](docs/THREE_PART_GRADING.md), gồm migration Supabase và nhập Excel/CSV. Tái tạo cả ba phiếu bằng `npm.cmd run forms:print`.
 
-Hai mẫu MCQ riêng: `public/forms/TNDO-A20.pdf` và `TNDO-A40.pdf` (kèm SVG). Các mẫu mới dùng UUID/mã mới; phiếu và bài chấm cũ không bị thay đổi tọa độ. IndexedDB có bước chuyển dữ liệu cũ sang `tn-do-v1`, giữ cả ảnh và bản chờ gửi.
+Hai mẫu MCQ riêng: [20 câu v2](public/forms/TNDO-A20.pdf) và [40 câu v2](public/forms/TNDO-A40.pdf) (kèm SVG, PNG, JSON). Phiên bản in mới giữ cùng mã mẫu và tăng phiên bản; phiếu và bài chấm cũ không bị thay đổi tọa độ. Với Supabase, cần migration `202610200003_large_print_templates.sql` rồi bổ sung mẫu trong ứng dụng. IndexedDB tự bổ sung phiên bản mới, giữ cả ảnh và bản chờ gửi.
 
 ## Trạng thái kết nối hiện tại
 

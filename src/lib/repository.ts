@@ -34,11 +34,16 @@ export async function seedCloudTemplates(orgId: string) {
   const w = await loadWorkspace(orgId);
   for (const t of emptyWorkspace().templates) {
     const existing = latest(w.templates.filter(saved => saved.code === t.code))[0];
-    if (!existing || existing.version < t.version) {
+    const missingLayout = !!t.print_layout && !w.templates.some(saved => saved.code === t.code && saved.print_layout === t.print_layout);
+    if (!existing || existing.version < t.version || missingLayout) {
       const targetId = existing?.id ?? crypto.randomUUID();
       // Install intermediate versions in order for an organization that has no copy yet.
-      if (!existing && t.code === 'TNDO-3P-2026' && t.version === 2) await saveTemplate(orgId, { ...t, id: targetId, version: 1, questions: t.questions.filter(q => q.section === 'mcq'), test_note: 'Nhận diện phần I trắc nghiệm.' });
-      await saveTemplate(orgId, { ...t, id: targetId });
+      if (!existing && t.code === 'TNDO-3P-2026' && t.version === 2) {
+        const first = { ...t, id: targetId, version: 1, questions: t.questions.filter(q => q.section === 'mcq'), test_note: 'Nhận diện phần I trắc nghiệm.' };
+        await saveTemplate(orgId, first); w.templates.push(first);
+      }
+      const next = { ...t, id: targetId, version: missingLayout && existing ? Math.max(t.version, existing.version + 1) : t.version };
+      await saveTemplate(orgId, next); w.templates.push(next);
     }
   }
 }

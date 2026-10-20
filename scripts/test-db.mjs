@@ -226,5 +226,19 @@ try {
   });
   await test('mixed grading helpers remain inaccessible to browser clients',()=>fails(as(teacher,()=>db.query("select public.valid_short_answer('1')")),/permission denied/i));
 
+  await test('new print-layout versions save without changing historical OMR geometry', async () => {
+    const { createLargePrintTemplate } = await vite.ssrLoadModule('/src/domain/large-print-sheet.ts');
+    for (const old of [template, mixedTemplate]) {
+      const enlarged = createLargePrintTemplate(old);
+      await call(admin, 'save_template', [org, enlarged]);
+      const templates = (await call(admin, 'get_workspace', [org])).templates;
+      assert.deepEqual(templates.find(t => t.id === old.id && t.version === old.version).anchors, old.anchors);
+      const saved = templates.find(t => t.id === old.id && t.version === enlarged.version);
+      assert.equal(saved.print_layout, 'a4-25mm'); assert.deepEqual(saved.student_region, enlarged.student_region);
+      await fails(call(admin, 'save_template', [org, { ...enlarged, version: enlarged.version + 1, print_layout: 'unknown' }]), /Unsupported print layout/);
+      await fails(call(admin, 'save_template', [org, { ...enlarged, version: enlarged.version + 1, unexpected: true }]), /Invalid template/);
+    }
+  });
+
   console.log(`\n${count} PostgreSQL/RLS integration checks passed.`);
 } catch (error) { console.error('DB CHECK FAILED:', error.message, error.detail ?? '', 'position', error.position ?? '', 'internal', error.internalPosition ?? '', error.where ?? ''); process.exitCode = 1; } finally { await vite.close(); await db.close(); }

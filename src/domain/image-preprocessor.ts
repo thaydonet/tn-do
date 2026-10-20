@@ -28,7 +28,10 @@ export async function imageCanvas(file: Blob): Promise<HTMLCanvasElement> {
 export async function detectAnchors(canvas: HTMLCanvasElement): Promise<Point[] | null> {
   const cv = await loadOpenCV(), src = cv.imread(canvas), gray = new cv.Mat(), binary = new cv.Mat(), contours = new cv.MatVector(), hierarchy = new cv.Mat();
   try {
-    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY); cv.threshold(gray, binary, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU); cv.findContours(binary, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY); cv.threshold(gray, binary, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
+    // A darker desk can surround the white sheet after thresholding. Include nested
+    // contours so its four markers remain visible inside that background contour.
+    cv.findContours(binary, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
     const candidates: Point[] = [];
     for (let i = 0; i < contours.size(); i++) {
       const contour = contours.get(i), rect = cv.boundingRect(contour), area = cv.contourArea(contour); contour.delete();

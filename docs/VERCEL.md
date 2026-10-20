@@ -40,4 +40,6 @@ Deploy Vercel không chạy migrations của Supabase. Với dự án đã chạ
 
 Sau deploy, kiểm tra trang đăng nhập, `/about.html`, `/forms/TNDO-A20.pdf`, `/forms/TNDO-A40.pdf` và `/vendor/opencv-4.11.0.js`. Các đường dẫn tài nguyên phải trả đúng tệp thay vì nội dung HTML của ứng dụng.
 
+Bộ phiếu lề 2,5 cm dùng 20/40 câu v2 và ba phần v3. Áp dụng tiếp `supabase/migrations/202610200003_large_print_templates.sql`, bổ sung phiên bản trong thư viện mẫu và chọn đúng phiên bản cho kỳ thi. Tạo lại PDF/SVG/PNG/JSON bằng `npm.cmd run forms:print` trước khi build nếu thay bố cục. Lề đã có sẵn trong PDF; in A4 ở 100%, không co vừa trang hoặc thêm lề.
+
 Tài liệu chính thức: [Vite trên Vercel](https://vercel.com/docs/frameworks/frontend/vite), [cấu hình vercel.json](https://vercel.com/docs/project-configuration/vercel-json), [Node.js](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions), [biến môi trường qua CLI](https://vercel.com/docs/cli/env), [các tệp bỏ qua khi deploy](https://vercel.com/docs/deployments/vercel-ignore).

@@ -25,9 +25,9 @@ try {
   for (const count of [20, 40]) {
     const t = createTemplate(count, TNDO_TEMPLATE_IDS[count]), width = t.width, height = t.height;
     const svg = renderSheetSVG(t);
-    await writeFile(`public/forms/TNDO-A${count}.svg`, svg);
+    await writeFile(`public/forms/TNDO-A${count}-v1.svg`, svg);
     await page.setContent(`<style>@page{size:A4;margin:0}body{margin:0}svg{display:block;width:210mm;height:297mm}</style>${svg}`);
-    await page.pdf({ path: `public/forms/TNDO-A${count}.pdf`, format: 'A4', printBackground: true, preferCSSPageSize: true });
+    await page.pdf({ path: `public/forms/TNDO-A${count}-v1.pdf`, format: 'A4', printBackground: true, preferCSSPageSize: true });
     const base64 = await page.evaluate(async ({ source, width, height }) => {
       const img = new Image(); img.src = source; await img.decode();
       const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;

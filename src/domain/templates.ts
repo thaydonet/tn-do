@@ -1,5 +1,6 @@
 import type { SheetTemplate } from './schemas';
 import { createMixedSheet } from './mixed-sheet';
+import { createLargePrintTemplate } from './large-print-sheet';
 export const TNDO_TEMPLATE_IDS: Record<number, string> = {
   20: '7d0a0020-2026-4000-8000-000000000001',
   40: '7d0a0040-2026-4000-8000-000000000001',
@@ -46,4 +47,6 @@ export function createMixedTemplate(): SheetTemplate {
     test_note: 'Chấm ba phần: 40 câu A–D, 8 câu đúng–sai (a–d), 6 câu trả lời ngắn. SBD 8 chữ số, mã đề 4 chữ số. Trả lời ngắn: tô các chữ số liên tiếp, dấu âm và dấu thập phân tô riêng.',
   };
 }
-export const initialTemplates = [...[20, 40].map(count => createTemplate(count, TNDO_TEMPLATE_IDS[count])), createMixedTemplate()];
+export const legacyTemplates = [...[20, 40].map(count => createTemplate(count, TNDO_TEMPLATE_IDS[count])), createMixedTemplate()];
+export const largePrintTemplates = legacyTemplates.map(createLargePrintTemplate);
+export const initialTemplates = [...legacyTemplates, ...largePrintTemplates];

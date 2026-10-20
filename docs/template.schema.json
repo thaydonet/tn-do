@@ -56,6 +56,10 @@
         "additionalProperties": false
       }
     },
+    "print_layout": {
+      "type": "string",
+      "const": "a4-25mm"
+    },
     "questions": {
       "minItems": 1,
       "maxItems": 500,

@@ -49,6 +49,7 @@ export const templateSchema = z.strictObject({
   id: z.uuid(), name: z.string().trim().min(1).max(120), code: z.string().regex(/^[A-Za-z0-9_-]+$/), version: z.number().int().positive(),
   width: z.number().int().min(400).max(3000), height: z.number().int().min(400).max(4000),
   anchors: z.array(pointSchema).length(4),
+  print_layout: z.literal('a4-25mm').optional(),
   questions: z.array(templateQuestionSchema).min(1).max(500),
   student_region: digitRegion.optional(), code_region: digitRegion.optional(),
   qr_region: z.strictObject({ x: z.number().min(0).max(1), y: z.number().min(0).max(1), width: z.number().positive().max(1), height: z.number().positive().max(1) }).optional(),

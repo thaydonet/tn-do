@@ -23,7 +23,7 @@ export function Exams() {
 }
 function ExamEditor({ exam, close }: { exam?: Exam; close: () => void }) {
   const { workspace: w, orgId, reload, organization } = useApp(), { busy, run } = useTask();
-  const missingTemplates = initialTemplates.some(expected => !w.templates.some(t => t.code === expected.code && t.version >= expected.version));
+  const missingTemplates = initialTemplates.some(expected => !w.templates.some(t => t.code === expected.code && t.version >= expected.version && (!expected.print_layout || t.print_layout === expected.print_layout)));
   const canManageTemplates = !organization || ['school_admin', 'platform_admin'].includes(organization.role);
   const [doc, setDoc] = useState<AnswerDocument>(() => structuredClone(exam?.document ?? defaultDocument())), [classId, setClassId] = useState(exam?.class_id ?? ''), [templateKey, setTemplateKey] = useState(exam ? `${exam.template_id}:${exam.template_version}` : ''), [date, setDate] = useState(exam?.date ?? new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' })), [tab, setTab] = useState('grid'), [codeIndex, setCodeIndex] = useState(0), [newCode, setNewCode] = useState(''), [json, setJson] = useState('');
   const selected = doc.answer_sheets[codeIndex] ?? doc.answer_sheets[0];

@@ -8,7 +8,7 @@ describe('Automatic phone capture', () => {
     expect(cameraCrop(1920, 1080, .75)).toEqual({ x: 555, y: 0, width: 810, height: 1080 });
     expect(cameraCrop(1200, 2000, .75)).toEqual({ x: 0, y: 200, width: 1200, height: 1600 });
     expect(alignedCameraCorners(targets, targets, aspect)).toEqual([true, true, true, true]);
-    expect(alignedCameraCorners(targets.map(p => ({ x: p.x, y: p.y + .03 })), targets, aspect)).toEqual([false, false, false, false]);
+    expect(alignedCameraCorners(targets.map(p => ({ x: p.x, y: p.y + .08 })), targets, aspect)).toEqual([false, false, false, false]);
   });
   it('requires all four markers and a steady sequence of frames for 900ms', () => {
     const gate = new CameraCaptureGate();

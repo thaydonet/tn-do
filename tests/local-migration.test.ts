@@ -15,7 +15,7 @@ it('preserves old workspace geometry, original image and pending captures during
   expect(migrated.templates.find(t => t.id === oldTemplate.id)?.questions).toEqual(oldTemplate.questions);
   expect(migrated.templates.some(t => t.code === 'TNDO-A20')).toBe(true);
   expect(migrated.templates.some(t => t.code === 'TNDO-3P-2026' && t.name === 'TN - DO 2026')).toBe(true);
-  expect((await loadLocal()).templates.filter(t => t.code === 'TNDO-3P-2026')).toHaveLength(1);
+  expect((await loadLocal()).templates.filter(t => t.code === 'TNDO-3P-2026').map(t => t.version)).toEqual([2, 3]);
   expect(await getImage('capture', 'original')).toBeTruthy();
   expect((await queueGet<{ id: string }>()).map(q => q.id)).toContain('capture');
   expect((await legacy.get('workspace', 'local')).templates).toHaveLength(1);

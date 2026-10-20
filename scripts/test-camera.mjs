@@ -17,7 +17,7 @@ try {
   await page.getByRole('heading', { name: 'Tổng quan', exact: true }).waitFor();
   const examId = await page.evaluate(async () => {
     const { emptyWorkspace, saveLocal } = await import('/src/lib/local-db.ts');
-    const template = await (await fetch('/fixtures/template-20.json')).json(), document = await (await fetch('/fixtures/answers-20.json')).json();
+    const template = await (await fetch('/forms/TNDO-A20-v2.json')).json(), document = await (await fetch('/fixtures/answers-20.json')).json();
     template.active = true;
     const w = emptyWorkspace(), classId = crypto.randomUUID(), id = crypto.randomUUID();
     w.templates = w.templates.filter(t => t.id !== template.id); w.templates.push(template); w.classes.push({ id: classId, name: 'Camera 12A', year: '2026' });
@@ -31,8 +31,8 @@ try {
   await page.getByRole('navigation').first().getByRole('button', { name: 'Chấm phiếu', exact: true }).click();
   await page.locator('.scan-config select').selectOption(examId);
   await page.evaluate(async () => {
-    const template = await (await fetch('/fixtures/template-20.json')).json();
-    const image = new Image(); image.src = '/fixtures/sheet-20-clean.png'; await image.decode();
+    const template = await (await fetch('/forms/TNDO-A20-v2.json')).json();
+    const image = new Image(); image.src = '/forms/TNDO-A20-v2.png'; await image.decode();
     const canvas = document.createElement('canvas'); canvas.width = template.width; canvas.height = template.height;
     const ctx = canvas.getContext('2d'), tracks = [];
     const show = (number, { offset = 0, noCode = false, review = false } = {}) => {
@@ -46,6 +46,7 @@ try {
         c.beginPath(); c.arc(b.x * sheet.width, b.y * sheet.height, b.radius * sheet.width * 1.6, 0, Math.PI * 2); c.fill();
       }
       c.fillStyle = '#000';
+      for (const q of template.questions) { const b = q.bubbles[(q.number - 1) % 4]; c.beginPath(); c.arc(b.x * sheet.width, b.y * sheet.height, b.radius * sheet.width * .93, 0, Math.PI * 2); c.fill(); }
       for (const [text, region] of [[number, template.student_region], [noCode ? '' : '101', template.code_region]]) [...text].forEach((digit, i) => {
         const b = region[i].find(b => b.label === digit); c.beginPath(); c.arc(b.x * sheet.width, b.y * sheet.height, b.radius * sheet.width, 0, Math.PI * 2); c.fill();
       });
@@ -57,7 +58,7 @@ try {
     } });
     const timer = setInterval(() => { ctx.drawImage(canvas, 0, 0); }, 70);
     window.cameraFixture = { show, tracks, timer };
-    show('000001', { offset: .07 });
+    show('000001', { offset: .13 });
   });
   await page.getByRole('button', { name: 'Chụp bằng camera', exact: true }).click();
   const camera = page.getByRole('dialog', { name: 'Chụp phiếu tự động' });

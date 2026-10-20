@@ -83,7 +83,7 @@ try {
   await page.getByRole('button', { name: 'Mở menu' }).click();
   await page.getByRole('navigation').first().getByRole('button', { name: 'Mẫu phiếu', exact: true }).click();
   await page.getByRole('heading', { name: 'TN - DO 2026 · Trắc nghiệm, đúng–sai, trả lời ngắn' }).waitFor();
-  const mixedDownload = page.waitForEvent('download'); await page.getByRole('link', { name: 'Tải PDF A4', exact: true }).click();
+  const mixedDownload = page.waitForEvent('download'); await page.locator('.mixed-sheet-card').getByRole('link', { name: 'Tải PDF A4', exact: true }).click();
   assert.equal((await mixedDownload).suggestedFilename(), 'TNDO-3P-2026.pdf');
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
   console.log('PASS three-part TN - DO design is visible and downloadable as A4 PDF');
@@ -141,7 +141,7 @@ try {
     const mixedPng = await fresh.evaluate(async numericKeys => {
       const {createMixedTemplate}=await import('/src/domain/templates.ts');
       const t=createMixedTemplate(), image=new Image();
-      const svg=await (await fetch('/forms/TNDO-3P-2026.svg')).text();
+      const {renderSheetSVG}=await import('/src/domain/sheet-renderer.ts'); const svg=renderSheetSVG(t);
       const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'})); image.src=url; await image.decode();
       const canvas=document.createElement('canvas'); canvas.width=t.width; canvas.height=t.height;
       const ctx=canvas.getContext('2d'); ctx.drawImage(image,0,0); URL.revokeObjectURL(url);
