@@ -18,6 +18,7 @@
     "postinstall": "node scripts/prepare-opencv.mjs",
     "prebuild": "node scripts/prepare-opencv.mjs",
     "test:browser": "node scripts/test-browser.mjs",
+    "test:camera": "node scripts/test-camera.mjs",
     "test:import": "node scripts/test-answer-import.mjs",
     "check": "node scripts/check.mjs",
     "forms:mixed": "node scripts/mixed-sheet.mjs",
