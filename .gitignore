@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+*.tsbuildinfo
+.DS_Store
+coverage/
+.openai/*
+!.openai/hosting.json
+.npm-cache/
+artifacts/
+.cache/
+public/vendor/
+.deploy/

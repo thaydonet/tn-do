@@ -1,0 +1,12 @@
+import { copyFile, mkdir, readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { createRequire } from 'node:module';
+import { dirname, resolve } from 'node:path';
+const require = createRequire(import.meta.url), source = require.resolve('@techstark/opencv-js');
+const root = resolve(dirname(source), '..'), version = JSON.parse(await readFile(resolve(root, 'package.json'), 'utf8')).version;
+if (version !== '4.11.0-release.1') throw new Error('Unexpected OpenCV version; review before updating');
+const checksum = createHash('sha256').update(await readFile(source)).digest('hex');
+if (checksum !== '5ad229d2666fce6803a3af4a569121bd6da8d09d5c164dbafb0d7f758460c25e') throw new Error('OpenCV checksum changed; review the distribution');
+await mkdir('public/vendor', { recursive: true });
+await copyFile(source, 'public/vendor/opencv-4.11.0.js'); await copyFile(resolve(root, 'LICENSE'), 'public/vendor/OPENCV-LICENSE.txt');
+console.log(`OpenCV ${version} ready · SHA256 ${checksum}`);

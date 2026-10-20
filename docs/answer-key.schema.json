@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "exam": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 150
+        },
+        "subject": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "grading_scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "title",
+        "subject",
+        "grading_scale"
+      ],
+      "additionalProperties": false
+    },
+    "answer_sheets": {
+      "minItems": 1,
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "exam_code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,20}$"
+          },
+          "sections": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "mcq"
+                },
+                "title": {
+                  "default": "Trắc nghiệm",
+                  "type": "string",
+                  "maxLength": 100
+                },
+                "choices": {
+                  "default": 4,
+                  "type": "integer",
+                  "minimum": 2,
+                  "maximum": 5
+                },
+                "questions": {
+                  "minItems": 1,
+                  "maxItems": 500,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "number": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 500
+                      },
+                      "correct_answer": {
+                        "type": "string",
+                        "enum": [
+                          "A",
+                          "B",
+                          "C",
+                          "D",
+                          "E"
+                        ]
+                      },
+                      "points": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "number",
+                      "correct_answer",
+                      "points"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "type",
+                "title",
+                "choices",
+                "questions"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "exam_code",
+          "sections"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "exam",
+    "answer_sheets"
+  ],
+  "additionalProperties": false
+}

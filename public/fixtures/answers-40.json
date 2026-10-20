@@ -1,0 +1,434 @@
+{
+  "schema_version": "1.0",
+  "exam": {
+    "title": "Kiểm thử tổng hợp 40 câu",
+    "subject": "Toán",
+    "grading_scale": 10
+  },
+  "answer_sheets": [
+    {
+      "exam_code": "101",
+      "sections": [
+        {
+          "type": "mcq",
+          "title": "Trắc nghiệm",
+          "choices": 4,
+          "questions": [
+            {
+              "number": 1,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 2,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 3,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 4,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 5,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 6,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 7,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 8,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 9,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 10,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 11,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 12,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 13,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 14,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 15,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 16,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 17,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 18,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 19,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 20,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 21,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 22,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 23,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 24,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 25,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 26,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 27,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 28,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 29,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 30,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 31,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 32,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 33,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 34,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 35,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 36,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 37,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 38,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 39,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 40,
+              "correct_answer": "D",
+              "points": 0.25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "exam_code": "102",
+      "sections": [
+        {
+          "type": "mcq",
+          "title": "Trắc nghiệm",
+          "choices": 4,
+          "questions": [
+            {
+              "number": 1,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 2,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 3,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 4,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 5,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 6,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 7,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 8,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 9,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 10,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 11,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 12,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 13,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 14,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 15,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 16,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 17,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 18,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 19,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 20,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 21,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 22,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 23,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 24,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 25,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 26,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 27,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 28,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 29,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 30,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 31,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 32,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 33,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 34,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 35,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 36,
+              "correct_answer": "A",
+              "points": 0.25
+            },
+            {
+              "number": 37,
+              "correct_answer": "B",
+              "points": 0.25
+            },
+            {
+              "number": 38,
+              "correct_answer": "C",
+              "points": 0.25
+            },
+            {
+              "number": 39,
+              "correct_answer": "D",
+              "points": 0.25
+            },
+            {
+              "number": 40,
+              "correct_answer": "A",
+              "points": 0.25
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
