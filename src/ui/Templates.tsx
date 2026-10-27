@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Copy, Download, Plus, SlidersHorizontal } from 'lucide-react';
 import { templateSchema, type SheetTemplate, type TemplateQuestion } from '../domain/schemas';
-import { createTemplate, initialTemplates, largePrintTemplates } from '../domain/templates';
+import { initialTemplates, largePrintTemplates } from '../domain/templates';
 import { downloadBlob, downloadJSON } from '../domain/import-service';
 import { renderSheetSVG } from '../domain/sheet-renderer';
 import { latest, saveTemplate, seedCloudTemplates } from '../lib/repository';
@@ -17,7 +17,7 @@ function calibrationTargets(q?: TemplateQuestion) {
 export function Templates() {
   const { workspace: w, orgId, reload, organization } = useApp(), [editing, setEditing] = useState<SheetTemplate | null>(null), { run, busy } = useTask();
   const canManage = !organization || ['school_admin', 'platform_admin'].includes(organization.role);
-  return <><div className="page-heading"><div><p className="eyebrow">CẤU HÌNH NHẬN DIỆN</p><h1>Thư viện mẫu phiếu</h1><p>Tọa độ, vùng tô và ngưỡng nhận diện theo từng phiên bản.</p></div>{canManage && <button className="button primary" onClick={() => setEditing(createTemplate(20))}><Plus size={18}/>Tạo mẫu phiếu</button>}</div>
+  return <><div className="page-heading"><div><p className="eyebrow">CẤU HÌNH NHẬN DIỆN</p><h1>Thư viện mẫu phiếu</h1><p>Tọa độ, vùng tô và ngưỡng nhận diện theo từng phiên bản.</p></div>{canManage && <button className="button primary" onClick={() => setEditing({ ...structuredClone(largePrintTemplates[0]), id: crypto.randomUUID(), version: 1 })}><Plus size={18}/>Tạo mẫu phiếu</button>}</div>
     <div className="notice amber">Bộ phiếu mới: A4, lề 2,5 cm bốn phía; mốc đen ×1,5; ô tô SBD/mã đề ×2. In tỷ lệ 100%, không thêm lề. Khi chụp, giữ phiếu phẳng và lấy đủ bốn mốc góc.</div>
     {canManage && initialTemplates.some(expected => !w.templates.some(t => t.code === expected.code && t.version >= expected.version && (!expected.print_layout || t.print_layout === expected.print_layout))) && <button className="button secondary" disabled={busy} onClick={() => void run(async () => { await seedCloudTemplates(orgId); await reload(); }, 'Đã thêm bộ phiếu TN - DO; các mẫu cũ vẫn được giữ nguyên')}>Thêm bộ phiếu TN - DO 20, 40 câu và TN - DO 2026</button>}
     <MixedSheetCard/>

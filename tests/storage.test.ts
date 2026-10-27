@@ -2,7 +2,8 @@ import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Exam, Student } from '../src/domain/schemas';
 import { emptyWorkspace, getImage, loadLocal, saveLocal } from '../src/lib/local-db';
-import { addStudents, saveExam } from '../src/lib/repository';
+import { addStudents, saveExam, upgradeExamPrintTemplate } from '../src/lib/repository';
+import { legacyTemplates } from '../src/domain/templates';
 import { commitSubmission, enqueueSubmission, pendingSubmissions, regradeSubmission, retryQueue, type PendingSubmission } from '../src/domain/submission-storage';
 
 const student: Student = { id: crypto.randomUUID(), class_id: crypto.randomUUID(), number: '000001', name: 'Học sinh mẫu' };
@@ -10,6 +11,19 @@ const exam: Exam = { id: crypto.randomUUID(), class_id: student.class_id, templa
 const item = (): PendingSubmission => ({ id: crypto.randomUUID(), org_id: 'local', user_id: 'local', exam, student, exam_code: '101', marks: Array.from({ length: 20 }, (_, i) => ({ number: i + 1, selected: ['A'], state: 'marked', confidence: 1, ratios: [1, 0, 0, 0], reviewed: true })), original: new Blob(['original'], { type: 'image/png' }), processed: new Blob(['processed'], { type: 'image/png' }), created_at: '2026-10-18T08:00:00Z' });
 beforeEach(async () => { const w = emptyWorkspace(); w.classes = [{ id: student.class_id, name: '12A1', year: '2026' }]; w.students = [student]; w.exams = [structuredClone(exam)]; await saveLocal(w); });
 describe('Persistent submission integration', () => {
+  it('upgrades the print layout without changing saved answers, images or historical exam versions', async () => {
+    const p = item(); p.exam = { ...structuredClone(exam), template_id: legacyTemplates[0].id };
+    const w = await loadLocal(); w.exams = [p.exam]; await saveLocal(w);
+    const saved = await commitSubmission(p);
+    const before = await loadLocal();
+    await upgradeExamPrintTemplate('local', p.exam, before.templates);
+    const after = await loadLocal();
+    expect(after.exams[0]).toEqual(before.exams[0]);
+    expect(after.exams[1]).toMatchObject({ id: p.exam.id, version: 2, template_version: 2, document: p.exam.document });
+    expect(after.submissions).toEqual(before.submissions);
+    expect(await getImage(saved.id, 'original')).toEqual(p.original);
+    expect(await getImage(saved.id, 'processed')).toEqual(p.processed);
+  });
   it('retains pending blobs until successful save and isolates account queues', async () => { const p = item(); await enqueueSubmission(p); expect((await pendingSubmissions('local', 'local')).some(q => q.id === p.id)).toBe(true); expect(await pendingSubmissions('other-org', 'local')).toEqual([]); await commitSubmission(p); expect((await pendingSubmissions('local', 'local')).some(q => q.id === p.id)).toBe(false); expect(await getImage(p.id, 'original')).toBeTruthy(); });
   it('retries persisted queue after simulated connection failure', async () => { const p = item(); await enqueueSubmission(p); const failures = await retryQueue('local', 'local'); expect(failures).toEqual([]); expect((await loadLocal()).submissions.length).toBe(1); });
   it('is idempotent for the same capture and rejects a second capture of one student', async () => { const p = item(); await enqueueSubmission(p); await commitSubmission(p); await commitSubmission(p); expect((await loadLocal()).submissions.length).toBe(1); await expect(commitSubmission(item())).rejects.toThrow(/đã có bài/); });

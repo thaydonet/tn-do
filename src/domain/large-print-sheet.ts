@@ -55,7 +55,7 @@ export function renderLargePrintSVG(t: SheetTemplate): string {
   rect(33, 26, 144, 12, 'rx="5" fill="#173d49"');
   text(36, 34, 'TN - DO', 5.7, 'font-weight="700" style="fill:white"');
   text(174, 32, mixed ? 'PHIẾU TRẢ LỜI · 2026' : `PHIẾU TRẢ LỜI · ${t.questions.length} CÂU`, 3.4, 'font-weight="700" text-anchor="end" style="fill:white"');
-  text(174, 36, 'A4 · LỀ 2,5 CM · MỐC LỚN', 2, 'text-anchor="end" style="fill:white"');
+  text(174, 36, `${t.code} · v${t.version} · A4 · LỀ 25 MM`, 2, 'text-anchor="end" style="fill:white"');
   text(33, 46, 'THÔNG TIN THÍ SINH', 2.8, 'font-weight="700"');
   for (const [i, label] of ['Họ tên: ....................................', 'Lớp: ............... Phòng: ............', 'Kỳ thi: ......................................', 'Môn: .........................................', 'Ngày: ......./......./.......', 'Chữ ký: .....................................'].entries()) text(33, 56 + i * 8, label, 2.5);
   for (const [region, title] of [[t.student_region, 'SỐ BÁO DANH'], [t.code_region, 'MÃ ĐỀ']] as const) {

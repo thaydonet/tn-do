@@ -1,6 +1,8 @@
 import { rpc, supabase } from './supabase';
 import { loadLocal, saveLocal, emptyWorkspace } from './local-db';
 import { answerDocumentSchema, templateSchema, type Exam, type SchoolClass, type SheetTemplate, type Student, type Workspace } from '../domain/schemas';
+import { newestPrintTemplate } from '../domain/templates';
+import { matchTemplate } from '../domain/template-matcher';
 export interface Organization { id: string; name: string; role: string }
 export interface Member { user_id: string; role: string; display_name: string }
 export async function loadWorkspace(orgId: string): Promise<Workspace> { return supabase ? rpc<Workspace>('get_workspace', { p_org: orgId }) : loadLocal(); }
@@ -29,6 +31,14 @@ export async function saveTemplate(orgId: string, template: SheetTemplate) {
   if (w.templates.some(t => t.id === template.id && t.code !== template.code)) throw new Error('Mã template không thay đổi giữa các phiên bản; hãy tạo bản sao');
   if (w.templates.some(t => t.id === template.id && t.version === template.version)) throw new Error('Phiên bản đã tồn tại; hãy tăng số phiên bản');
   w.templates.push(template); await saveLocal(w);
+}
+export async function upgradeExamPrintTemplate(orgId: string, exam: Exam, templates: SheetTemplate[]) {
+  const current = matchTemplate(templates, exam.template_id, exam.template_version);
+  const target = newestPrintTemplate(templates, current.code);
+  if (!target) throw new Error('Chưa có mẫu in mới. Nhờ quản trị viên bổ sung bộ mẫu trong Thư viện mẫu phiếu.');
+  if (target.id === current.id && target.version === current.version) return;
+  matchTemplate(templates, target.id, target.version, exam.document);
+  await saveExam(orgId, { ...exam, template_id: target.id, template_version: target.version, version: exam.version + 1 }, true);
 }
 export async function seedCloudTemplates(orgId: string) {
   const w = await loadWorkspace(orgId);

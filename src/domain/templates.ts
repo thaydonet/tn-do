@@ -50,3 +50,8 @@ export function createMixedTemplate(): SheetTemplate {
 export const legacyTemplates = [...[20, 40].map(count => createTemplate(count, TNDO_TEMPLATE_IDS[count])), createMixedTemplate()];
 export const largePrintTemplates = legacyTemplates.map(createLargePrintTemplate);
 export const initialTemplates = [...legacyTemplates, ...largePrintTemplates];
+
+/** Resolve organization-owned IDs; never replace historical template geometry. */
+export function newestPrintTemplate(templates: SheetTemplate[], code: string) {
+  return templates.filter(t => t.code === code && t.print_layout === 'a4-25mm').sort((a, b) => b.version - a.version)[0];
+}

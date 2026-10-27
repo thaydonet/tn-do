@@ -1,5 +1,13 @@
 # Chấm phiếu TN - DO 2026 ba phần
 
+## Dùng bộ phiếu hiện tại
+
+Kỳ thi mới mặc định chọn **TNDO-A20 v2**. Chọn **TNDO-A40 v2** cho phiếu 40 câu hoặc **TNDO-3P-2026 v3** cho phiếu ba phần. Mã và phiên bản được in ở đầu cả ba phiếu; các tệp không có hậu tố phiên bản trong `public/forms` luôn trỏ đến bộ in hiện tại.
+
+Nếu kỳ thi đã tạo bằng mẫu cũ, vào **Chấm phiếu**, chọn kỳ thi và bấm **Dùng phiếu mới nhất** trước khi đưa phiếu mới vào nhận diện. Thao tác này tạo phiên bản kỳ thi mới với cùng đáp án và mẫu in hiện tại. Ảnh, điểm và phiên bản của bài đã chấm vẫn được giữ nguyên. Mẫu chưa được kiểm chứng bằng ảnh thực vẫn yêu cầu xác nhận sử dụng. Nếu chưa có mẫu mới trong tổ chức, quản trị viên vào **Thư viện mẫu phiếu** để bổ sung bộ mẫu; Supabase cần migration `202610200003_large_print_templates.sql` như hướng dẫn bên dưới.
+
+Kiểm tra trọn luồng chuyển mẫu và chấm trực tiếp các PNG/JSON trong `public/forms` bằng `npm.cmd run test:forms-flow`. Chạy `npm.cmd run forms:print` sau khi thay đổi trình tạo phiếu để đồng bộ PDF/SVG/PNG/JSON.
+
 ## Bộ phiếu A4 lề 2,5 cm, ô tô lớn
 
 Bộ in mới gồm **TNDO-A20 v2**, **TNDO-A40 v2** và **TNDO-3P-2026 v3**. Bốn ô vuông định vị trên camera có cạnh lớn gấp 3. Trên cả ba mẫu in, mốc đen có cạnh 5,25 mm (gấp 1,5); đường kính ô tô SBD/mã đề tăng gấp đôi: 4,872 mm cho phiếu 20/40 câu, 3,78 mm cho phiếu ba phần. Các hàng/cột đã được giãn và bố trí lại, không chồng ô. Mọi tọa độ OMR dùng cùng nguồn với bản in.

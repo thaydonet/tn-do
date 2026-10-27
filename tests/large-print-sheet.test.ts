@@ -1,9 +1,27 @@
 import { expect, it } from 'vitest';
-import { largePrintTemplates, legacyTemplates } from '../src/domain/templates';
+import { largePrintTemplates, legacyTemplates, newestPrintTemplate } from '../src/domain/templates';
+import { readFileSync } from 'node:fs';
 import { questionBubbles, templateSchema } from '../src/domain/schemas';
 import { PRINT_ANCHOR_MM } from '../src/domain/large-print-sheet';
 import { renderSheetSVG } from '../src/domain/sheet-renderer';
 import { CAMERA_GUIDE_SIZE } from '../src/domain/camera-capture';
+
+it('ships matching latest and versioned print files with exactly the runtime OMR geometry', () => {
+  for (const template of largePrintTemplates) {
+    for (const stem of [template.code, `${template.code}-v${template.version}`]) {
+      expect(JSON.parse(readFileSync(`public/forms/${stem}.json`, 'utf8'))).toEqual(template);
+      expect(readFileSync(`public/forms/${stem}.svg`, 'utf8')).toBe(renderSheetSVG(template));
+    }
+  }
+});
+
+it('finds the newest print layout using organization IDs and excludes old-layout revisions', () => {
+  const t = { ...structuredClone(largePrintTemplates[0]), id: crypto.randomUUID(), version: 8 };
+  const old = { ...structuredClone(legacyTemplates[0]), id: t.id, version: 9 };
+  expect(newestPrintTemplate([old, t], t.code)).toEqual(t);
+  expect(newestPrintTemplate([old], t.code)).toBeUndefined();
+  expect(newestPrintTemplate([t], 'other')).toBeUndefined();
+});
 
 it('triples camera guide sides and enlarges each printed identifier diameter exactly twice', () => {
   expect(CAMERA_GUIDE_SIZE).toBeCloseTo(.065 * 3);

@@ -20,6 +20,7 @@
     "test:browser": "node scripts/test-browser.mjs",
     "test:camera": "node scripts/test-camera.mjs",
     "test:print": "node scripts/test-print-forms.mjs",
+    "test:forms-flow": "node scripts/test-current-forms.mjs",
     "test:import": "node scripts/test-answer-import.mjs",
     "check": "node scripts/check.mjs",
     "forms:mixed": "node scripts/print-forms.mjs",
