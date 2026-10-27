@@ -80,6 +80,34 @@ try {
   page.once('dialog', dialog => dialog.accept()); await page.getByRole('button', { name: 'Xác nhận áp dụng dữ liệu', exact: true }).click();
   await page.locator('.code-toolbar').waitFor(); assert.equal(await page.locator('.answer-grid select').count(), 20);
   console.log('PASS legacy CSV column mapping still imports weighted answers');
+  // Reproduce invalid codes in both the add-code action and save action.
+  const newCodeInput = page.getByPlaceholder('Mã đề mới');
+  await newCodeInput.fill('Mã đề 105');
+  await page.getByRole('button', { name: 'Thêm mã đề', exact: true }).click();
+  await page.getByText('Mã đề cần có 1–20 ký tự', { exact: false }).waitFor();
+  assert.equal(await page.locator('.code-toolbar select option').count(), 2);
+  await page.getByRole('button', { name: 'Đóng thông báo', exact: true }).click();
+  await newCodeInput.fill(' 0105 ');
+  await page.getByRole('button', { name: 'Thêm mã đề', exact: true }).click();
+  await page.getByLabel('Sửa mã đề', { exact: true }).filter({ visible: true }).waitFor();
+  assert.equal(await page.getByLabel('Sửa mã đề', { exact: true }).inputValue(), '0105');
+  await newCodeInput.fill(' 0105 ');
+  await page.getByRole('button', { name: 'Thêm mã đề', exact: true }).click();
+  await page.getByText('Mã đề 0105 đã tồn tại. Hãy nhập mã khác.', { exact: true }).waitFor();
+  assert.equal(await page.locator('.code-toolbar select option').count(), 3);
+  await page.getByRole('button', { name: 'Đóng thông báo', exact: true }).click();
+  await page.getByLabel('Sửa mã đề', { exact: true }).fill('10/5');
+  await page.getByRole('button', { name: 'Lưu kỳ thi', exact: true }).click();
+  await page.getByText('Mã đề cần có 1–20 ký tự', { exact: false }).waitFor();
+  assert.equal(await page.getByRole('dialog').count(), 1);
+  await page.getByRole('button', { name: 'Đóng thông báo', exact: true }).click();
+  await page.getByLabel('Sửa mã đề', { exact: true }).fill(' 0105 ');
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: 'Lưu kỳ thi', exact: true }).click();
+  await page.getByRole('dialog').waitFor({ state: 'hidden' });
+  const updated = await page.evaluate(async () => (await (await import('/src/lib/local-db.ts')).loadLocal()).exams);
+  assert.deepEqual(updated.find(exam => exam.version === 2).document.answer_sheets.map(sheet => sheet.exam_code), ['101', '102', '0105']);
+  console.log('PASS invalid codes show readable Vietnamese errors; trimmed codes preserve leading zeros, duplicates are blocked, and corrected keys save');
   assert.deepEqual(errors, []);
 } catch (error) {
   // The source workbook may contain private exam answers; do not capture its preview.

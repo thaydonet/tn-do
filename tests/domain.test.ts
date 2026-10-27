@@ -15,6 +15,20 @@ const document: AnswerDocument = answerDocumentSchema.parse({ schema_version: '1
 const marks = (answer: string): Recognition[] => Array.from({ length: 20 }, (_, i) => ({ number: i + 1, selected: [answer], state: 'marked', confidence: 1, ratios: [1, 0, 0, 0] }));
 const id = '10000000-0000-4000-8000-000000000001';
 describe('Versioned answer documents', () => {
+  it('trims pasted exam codes while preserving leading zeros and letter case', () => {
+    const d = structuredClone(document); d.answer_sheets[0].exam_code = ' \u00a00101_a-B\n';
+    expect(answerDocumentSchema.parse(d).answer_sheets[0].exam_code).toBe('0101_a-B');
+  });
+  it.each(['', '   ', 'Mã đề 101', '10 1', '101/102', 'A'.repeat(21)])('explains invalid exam code %j in Vietnamese', code => {
+    const d = structuredClone(document); d.answer_sheets[0].exam_code = code;
+    const result = answerDocumentSchema.safeParse(d);
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error.issues[0].message).toContain('Mã đề cần có 1–20 ký tự');
+  });
+  it('rejects duplicate exam codes after trimming', () => {
+    const d = structuredClone(document); d.answer_sheets[1].exam_code = ' 101 ';
+    expect(() => answerDocumentSchema.parse(d)).toThrow('Trùng mã đề');
+  });
   it('accepts two codes and preserves weighted grading', () => { expect(grade(document, '101', marks('A')).score).toBe(10); expect(grade(document, '102', marks('A')).score).toBe(0); });
   it('uses per-question weights instead of a fixed score', () => { const d = structuredClone(document), qs = d.answer_sheets[0].sections[0].questions; qs[0].points = 1.5; qs.slice(1, 5).forEach(q => { q.points = .25; }); answerDocumentSchema.parse(d); const m = marks('B'); m[0].selected = ['A']; expect(grade(d, '101', m).score).toBe(1.5); });
   it('requires an exact code', () => { expect(() => resolveAnswerKey(document, '')).toThrow(); expect(() => grade(document, '999', marks('A'))).toThrow(); });

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { normalizeNumericAnswer } from './answer-format';
 
 export const choices = ['A', 'B', 'C', 'D', 'E'] as const;
+export const examCodeSchema = z.string().trim().regex(/^[A-Za-z0-9_-]{1,20}$/, 'Mã đề cần có 1–20 ký tự, chỉ gồm chữ không dấu A–Z, a–z, số 0–9, dấu gạch ngang (-) hoặc gạch dưới (_). Ví dụ: 0101.');
 export const questionSchema = z.strictObject({ number: z.number().int().positive().max(500), correct_answer: z.string().trim().min(1).max(20), points: z.number().positive().max(100) });
 const sectionSchema = z.strictObject({ type: z.enum(['mcq', 'true_false', 'short_answer']), title: z.string().max(100).default('Trắc nghiệm'), choices: z.number().int().min(2).max(5).default(4), scoring: z.enum(['partial', 'per_item']).optional(), questions: z.array(questionSchema).min(1).max(500) }).superRefine((s, ctx) => {
   if (s.type !== 'mcq' && s.choices !== 4) ctx.addIssue({ code: 'custom', message: 'Phần đúng–sai và trả lời ngắn dùng cấu hình bốn ý / bốn cột' });
@@ -14,7 +15,7 @@ const sectionSchema = z.strictObject({ type: z.enum(['mcq', 'true_false', 'short
 export const answerDocumentSchema = z.strictObject({
   schema_version: z.literal('1.0'),
   exam: z.strictObject({ title: z.string().trim().min(1).max(150), subject: z.string().trim().min(1).max(80), grading_scale: z.number().positive().max(100) }),
-  answer_sheets: z.array(z.strictObject({ exam_code: z.string().regex(/^[A-Za-z0-9_-]{1,20}$/), sections: z.array(sectionSchema).min(1).max(20) })).min(1).max(100),
+  answer_sheets: z.array(z.strictObject({ exam_code: examCodeSchema, sections: z.array(sectionSchema).min(1).max(20) })).min(1).max(100),
 }).superRefine((d, ctx) => {
   const codes = new Set<string>();
   d.answer_sheets.forEach((s, i) => {
