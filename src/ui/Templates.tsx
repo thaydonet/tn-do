@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Copy, Download, Plus, SlidersHorizontal } from 'lucide-react';
 import { templateSchema, type SheetTemplate, type TemplateQuestion } from '../domain/schemas';
-import { initialTemplates, largePrintTemplates } from '../domain/templates';
+import { initialTemplates, largePrintTemplates, createTNMakerTemplate } from '../domain/templates';
 import { downloadBlob, downloadJSON } from '../domain/import-service';
 import { renderSheetSVG } from '../domain/sheet-renderer';
 import { latest, saveTemplate, seedCloudTemplates } from '../lib/repository';
@@ -20,10 +20,15 @@ export function Templates() {
   return <><div className="page-heading"><div><p className="eyebrow">CẤU HÌNH NHẬN DIỆN</p><h1>Thư viện mẫu phiếu</h1><p>Tọa độ, vùng tô và ngưỡng nhận diện theo từng phiên bản.</p></div>{canManage && <button className="button primary" onClick={() => setEditing({ ...structuredClone(largePrintTemplates[0]), id: crypto.randomUUID(), version: 1 })}><Plus size={18}/>Tạo mẫu phiếu</button>}</div>
     <div className="notice amber">Bộ phiếu mới: A4, lề 2,5 cm bốn phía; mốc đen ×1,5; ô tô SBD/mã đề ×2. In tỷ lệ 100%, không thêm lề. Khi chụp, giữ phiếu phẳng và lấy đủ bốn mốc góc.</div>
     {canManage && initialTemplates.some(expected => !w.templates.some(t => t.code === expected.code && t.version >= expected.version && (!expected.print_layout || t.print_layout === expected.print_layout))) && <button className="button secondary" disabled={busy} onClick={() => void run(async () => { await seedCloudTemplates(orgId); await reload(); }, 'Đã thêm bộ phiếu TN - DO; các mẫu cũ vẫn được giữ nguyên')}>Thêm bộ phiếu TN - DO 20, 40 câu và TN - DO 2026</button>}
+    <TNMakerSheetCard/>
     <MixedSheetCard/>
     <div className="template-cards">{latest(w.templates).map(t => <article className="panel template-card" key={t.id}><div className="template-preview"><div className="sheet-svg-preview" dangerouslySetInnerHTML={{ __html: renderSheetSVG(t) }}/><span className="template-version">v{t.version}</span></div><div className="template-details"><div className="card-top"><span className="eyebrow">{t.code}</span>{t.active && <Badge tone="green">Đã kích hoạt</Badge>}</div><h2>{t.name}</h2><p>{t.questions.length} câu · {t.width} × {t.height} px</p><p className="helper">{t.test_note.replace(/TNMaker/gi, 'mẫu gốc')}</p><div className="actions">{canManage && <><button className="button secondary" onClick={() => setEditing({ ...structuredClone(t), version: t.version + 1, active: false, tested_version: null })}><SlidersHorizontal size={15}/>Hiệu chỉnh</button><button className="icon-button" aria-label="Sao chép mẫu" onClick={() => setEditing({ ...structuredClone(t), id: crypto.randomUUID(), code: `${t.code}-COPY-${Date.now().toString().slice(-5)}`, name: `${t.name} (bản sao)`, version: 1, active: false, tested_version: null })}><Copy size={17}/></button></>}{t.print_layout === 'a4-25mm' && largePrintTemplates.some(p => p.code === t.code && p.version === t.version) && <a className="button primary" href={`/forms/${t.code}-v${t.version}.pdf`} download><Download size={15}/>Tải PDF A4</a>}{t.code.startsWith('TNDO-') && <button className="button secondary" onClick={() => downloadBlob(new Blob([renderSheetSVG(t)], { type: "image/svg+xml" }), t.code + "-v" + t.version + ".svg")}>Tải phiếu A4</button>}<button className="icon-button" aria-label="Tải cấu hình" onClick={() => downloadJSON(t, `${t.code}-v${t.version}.json`)}><Download size={17}/></button></div></div></article>)}</div>
     {editing && <TemplateEditor initial={editing} close={() => setEditing(null)}/>}
   </>;
+}
+function TNMakerSheetCard() {
+  const t = createTNMakerTemplate();
+  return <article className="panel mixed-sheet-card"><div className="mixed-preview" dangerouslySetInnerHTML={{ __html: renderSheetSVG(t) }}/><div><div className="card-top"><span className="eyebrow">TNMAKER-2026 · A4</span><Badge tone="green">Mẫu chuẩn TN-Maker / BGD</Badge></div><h2>TN-Maker 2026 · Chuẩn Bộ GD&ĐT (40 TN, 8 Đ/S, 6 TLN)</h2><p>40 câu A–D · 8 câu đúng–sai × 4 ý · 6 câu trả lời ngắn 4 cột. SBD 8 số, mã đề 4 số. 4 mốc góc định vị ngoài.</p><p className="helper">Tương thích trực tiếp với phiếu in chuẩn của ứng dụng TNMaker và kỳ thi tốt nghiệp THPT 2025–2026. Chấm chính xác không cần sửa lề.</p><div className="actions"><a className="button primary" href="/forms/TNMAKER-2026.png" download><Download size={16}/>Tải ảnh PNG gốc</a><a className="button secondary" href="/forms/TNMAKER-2026.svg" download>Tải SVG</a><a className="button secondary" href="/forms/TNMAKER-2026.json" download>Tải JSON cấu hình</a></div></div></article>;
 }
 function MixedSheetCard() {
   const design = largePrintTemplates[2];

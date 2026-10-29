@@ -1,6 +1,8 @@
 import type { SheetTemplate } from './schemas';
 import { createMixedSheet } from './mixed-sheet';
 import { createLargePrintTemplate } from './large-print-sheet';
+import { createTNMakerTemplate } from './tnmaker-sheet';
+export { createTNMakerTemplate, TNMAKER_TEMPLATE_ID } from './tnmaker-sheet';
 export const TNDO_TEMPLATE_IDS: Record<number, string> = {
   20: '7d0a0020-2026-4000-8000-000000000001',
   40: '7d0a0040-2026-4000-8000-000000000001',
@@ -49,9 +51,10 @@ export function createMixedTemplate(): SheetTemplate {
 }
 export const legacyTemplates = [...[20, 40].map(count => createTemplate(count, TNDO_TEMPLATE_IDS[count])), createMixedTemplate()];
 export const largePrintTemplates = legacyTemplates.map(createLargePrintTemplate);
-export const initialTemplates = [...legacyTemplates, ...largePrintTemplates];
+export const initialTemplates = [...legacyTemplates, ...largePrintTemplates, createTNMakerTemplate()];
 
 /** Resolve organization-owned IDs; never replace historical template geometry. */
 export function newestPrintTemplate(templates: SheetTemplate[], code: string) {
+  if (code === 'TNMAKER-2026') return templates.filter(t => t.code === code).sort((a, b) => b.version - a.version)[0];
   return templates.filter(t => t.code === code && t.print_layout === 'a4-25mm').sort((a, b) => b.version - a.version)[0];
 }

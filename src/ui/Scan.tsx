@@ -55,10 +55,12 @@ export function Scan({ initialExamId = '' }: { initialExamId?: string }) {
     }
     if (a.qr?.student_number && a.studentNumber && a.qr.student_number !== a.studentNumber) throw new Error('Số báo danh QR và ô tô không khớp');
     if (a.qr?.exam_code && a.examCode && a.qr.exam_code !== a.examCode) throw new Error('Mã đề QR và ô tô không khớp');
-    const number = a.qr?.student_number ?? a.studentNumber, detectedCode = a.qr?.exam_code ?? a.examCode;
-    if (detectedCode && !exam.document.answer_sheets.some(s => s.exam_code === detectedCode)) throw new Error(`Mã đề nhận diện ${detectedCode} không thuộc kỳ thi`);
-    const matchingStudents = students.filter(s => s.number === number), detectedStudent = matchingStudents.length === 1 ? matchingStudents[0] : undefined;
-    if (number && !detectedStudent) { const message = `SBD ${number} không có trong danh sách học sinh được chọn. Cần xác minh thủ công.`; notify(message, true); await recordIssue(orgId, exam.id, 'student', message); }
+    const rawNumber = a.qr?.student_number ?? a.studentNumber, rawCode = a.qr?.exam_code ?? a.examCode;
+    const matchedSheet = exam.document.answer_sheets.find(s => s.exam_code === rawCode || (rawCode && s.exam_code.replace(/^0+/, '') === rawCode.replace(/^0+/, '')));
+    if (rawCode && !matchedSheet) throw new Error(`Mã đề nhận diện ${rawCode} không thuộc kỳ thi`);
+    const detectedCode = matchedSheet ? matchedSheet.exam_code : rawCode;
+    const matchingStudents = students.filter(s => s.number === rawNumber || (rawNumber && s.number.replace(/^0+/, '') === rawNumber.replace(/^0+/, ''))), detectedStudent = matchingStudents.length === 1 ? matchingStudents[0] : undefined;
+    if (rawNumber && !detectedStudent) { const message = `SBD ${rawNumber} không có trong danh sách học sinh được chọn. Cần xác minh thủ công.`; notify(message, true); await recordIssue(orgId, exam.id, 'student', message); }
     const id = crypto.randomUUID();
     setStudentId(detectedStudent?.id ?? ''); setCode(detectedCode ?? ''); setAnalysis(a); setMarks(a.marks); setConfirmed(false); setSubmissionId(id);
     if (automatic) {
