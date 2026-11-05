@@ -97,7 +97,7 @@ npm.cmd run build
 
 ## Phạm vi và triển khai
 
-Hỗ trợ chấm có trọng số cho các phần `mcq`, 2–5 lựa chọn, một đáp án đúng. Cấu trúc schema có phiên bản; loại câu khác chưa được hỗ trợ và bị từ chối. Quy tắc hiện tại: đúng nhận điểm câu, sai/bỏ trống/nhiều ô được 0, làm tròn 4 chữ số. Không tự nhận dạng đúng/sai nhiều ý hoặc câu trả lời số của các mẫu khác.
+Hỗ trợ chấm có trọng số cho `mcq` (2–5 lựa chọn, một đáp án đúng), `true_false` (4 ý; chia đều hoặc 10/25/50/100% điểm câu) và `short_answer` (dạng số, 4 cột, hỗ trợ dấu âm và thập phân). Cấu trúc schema có phiên bản; loại câu khác bị từ chối. Quy tắc chung: đúng nhận điểm câu, sai/bỏ trống/nhiều ô được 0, làm tròn 4 chữ số; câu trả lời ngắn so khớp số đã chuẩn hóa. Chưa có OCR chữ viết tay.
 
 Đã kết nối cấu hình Supabase và kiểm tra endpoint Auth/REST như mô tả phía trên. Chưa có ảnh chụp từ bản in TN - DO trên thiết bị thật hoặc tài khoản thử nghiệm được cấp; chưa công bố độ chính xác nhận diện thực tế hay xác nhận luồng upload Supabase của một tài khoản thật. Cần kiểm chứng các phần này trước khi dùng cho kỳ thi thật. Báo cáo chi tiết: [docs/DELIVERY.md](docs/DELIVERY.md).
 

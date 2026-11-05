@@ -33,7 +33,7 @@
 - `npm.cmd run typecheck`: TypeScript strict.
 - `npm.cmd run lint`: ESLint và React Hooks.
 - `npm.cmd test`: bộ kiểm thử cho Zod, đáp án nhiều mã, tổng điểm có trọng số, CSV/XLSX/JSON, QR, template, OMR pixel, review, phiên bản, lưu ảnh, idempotency, upload gián đoạn, chuyển dữ liệu cũ và thiết kế phiếu TN - DO. Số lượng/kết quả lần chạy cuối nằm trong `artifacts/verification.txt`.
-- `npm.cmd run test:db`: **53 kiểm tra đạt**, chạy migrations trong PostgreSQL WebAssembly, kiểm tra RLS/grants thật dưới nhiều UUID/role. Bao gồm cách ly tổ chức/lớp, quyền viewer/examiner, chống nâng quyền, upload thiếu ảnh, điểm giả từ client, version/regrade/concurrency, lời mời, review issues và private bucket.
+- `npm.cmd run test:db`: **78 kiểm tra đạt** (05/11/2026), chạy migrations trong PostgreSQL WebAssembly, kiểm tra RLS/grants thật dưới nhiều UUID/role. Bao gồm cách ly tổ chức/lớp, quyền viewer/examiner, chống nâng quyền, upload thiếu ảnh, điểm giả từ client, version/regrade/concurrency, lời mời, review issues và private bucket.
 - `npm.cmd run test:browser`: Chrome thật, tạo lớp/học sinh/kỳ thi bằng UI; composite QR theo ID mới; OpenCV/ZXing thật đọc đúng SBD `000001`, mã `101` và 20 câu; xác nhận/lưu ảnh + điểm; mở lại ảnh, xuất CSV; tải lại vẫn còn dữ liệu; menu ở 390 px; không tràn ngang/ngoại lệ JS. Kiểm tra 6 PNG tổng hợp của hai mẫu 20/40 câu: rõ, phối cảnh/ánh sáng lệch và câu trống/nhiều ô/nghi ngờ.
 - `npm.cmd run build`: tạo bản tĩnh trong `dist`, chia tải công cụ theo màn hình, OpenCV chỉ tải khi cần nhận diện. Cảnh báo annotation từ dependency Zod không ảnh hưởng build; SheetJS là thư viện lớn được tải ở màn hình import/export.
 
@@ -43,7 +43,7 @@ Screenshots trong `artifacts/dashboard-desktop.png`, `dashboard-mobile.png`, `sc
 
 1. **Kiểm chứng Supabase:** đã có URL/anon key và kiểm tra được endpoint thật. Chưa có tài khoản đăng nhập hoặc quyền SQL quản trị để kiểm tra đầy đủ Auth/Storage/RLS trên dữ liệu thật. Migrations và phân quyền được kiểm thử riêng trong PostgreSQL WASM.
 2. **Chưa có ảnh phiếu in thực tế:** hai mẫu phát triển vẫn inactive/thử nghiệm. Không cam kết tương thích mọi mẫu hoặc đưa ra tỷ lệ chính xác thực tế. Người dùng phải hiệu chỉnh từ ảnh mẫu thật và đánh giá bộ ảnh độc lập.
-3. **Loại câu:** triển khai weighted MCQ một đáp án đúng, 2–5 lựa chọn/phần; chưa có chấm đúng/sai nhiều ý, câu số ngắn hoặc OCR chữ viết tay. Các loại không hỗ trợ bị từ chối bằng schema.
+3. **Loại câu:** đã hỗ trợ MCQ một đáp án đúng (2–5 lựa chọn), đúng–sai 4 ý (chia đều hoặc 10/25/50/100% điểm câu) và trả lời ngắn dạng số (4 cột, dấu âm/thập phân) cho mẫu ba phần. Chưa hỗ trợ OCR chữ viết tay hoặc loại câu ngoài schema; các loại không hỗ trợ bị từ chối.
 4. **Camera:** đã kiểm tra upload/capture file trong Chrome headless; chưa kiểm tra camera vật lý và các trình duyệt điện thoại thật. Đích triển khai cho điện thoại cần HTTPS.
 5. **Mời/QR hàng loạt:** mã mời được tạo và nhập trong UI, không gửi email tự động. Tham chiếu QR được tạo/xác thực qua RPC; chưa có giao diện in/phát hành QR hàng loạt.
 6. **Dữ liệu đang chờ:** Blob chưa upload nằm trên thiết bị. Không có đồng bộ nền khi ứng dụng đóng hoặc phục hồi Blob sau khi xóa dữ liệu trình duyệt. Thay template sau khi đã chấm yêu cầu quét lại; chức năng chấm lại hiện chỉ áp dụng cùng template version, giữ ảnh cũ bất biến.

@@ -22,12 +22,15 @@ export function Scan({ initialExamId = '' }: { initialExamId?: string }) {
   const hasNewPrint = newestPrint && (newestPrint.id !== template?.id || newestPrint.version !== template?.version);
   const recognitionTemplate = useMemo(() => {
     if (!template || !exam) return template;
+    // For mixed sheets (3-part), use all questions from template, not filtered by answer_sheets
+    // because answer_sheets only has question numbers, not types (mcq/true_false/short_answer)
+    if (template.code === 'TNDO-3P-2026' || template.code === 'TNMAKER-2026') return template;
     const numbers = new Set(exam.document.answer_sheets.flatMap(s => s.sections.flatMap(section => section.questions.map(q => q.number))));
     return { ...template, questions: template.questions.filter(q => numbers.has(q.number)) };
   }, [template, exam]);
-  const activeNumbers = new Set((exam?.document.answer_sheets.find(s => s.exam_code === code)?.sections.flatMap(s => s.questions) ?? recognitionTemplate?.questions ?? []).map(q => q.number));
+  const activeNumbers = new Set((exam?.document.answer_sheets.find(s => s.exam_code === code)?.sections.flatMap(s => s.questions) ?? (recognitionTemplate && (recognitionTemplate.code === 'TNDO-3P-2026' || recognitionTemplate.code === 'TNMAKER-2026') ? recognitionTemplate.questions : recognitionTemplate?.questions ?? [])).map(q => q.number));
   const activeMarks = marks.filter(m => activeNumbers.has(m.number));
-  const result = useMemo(() => { if (!exam || !code || !marks.length) return null; try { return grade(exam.document, code, marks); } catch { return null; } }, [exam, code, marks]);
+  const result = useMemo(() => { if (!exam || !code || !marks.length) return null; try { return grade(exam.document, code, activeMarks.length > 0 ? activeMarks : marks); } catch { return null; } }, [exam, code, marks, activeMarks]);
   const invalidate = () => { setAnalysis(null); setMarks([]); setConfirmed(false); };
   const save = async (a: Analysis, detectedStudent: Student, examCode: string, detectedMarks: Recognition[], id: string) => {
     if (!exam) return;

@@ -12,7 +12,13 @@ try {
   await page.getByRole('heading', { name: 'Chào mừng trở lại' }).waitFor();
   assert.match(await page.title(), /TN - DO/); assert.ok(await page.getByLabel('Email', { exact: true }).isVisible());
   assert.equal(await page.getByRole('heading', { name: 'Tổng quan', exact: true }).count(), 0);
-  for (const path of ['/about.html', '/forms/TNDO-A20.pdf', '/forms/TNDO-A40.svg', '/forms/TNDO-3P-2026.pdf', '/forms/TNDO-3P-2026.png', '/vendor/opencv-4.11.0.js']) assert.equal((await page.request.get(`http://127.0.0.1:4176${path}`)).status(), 200);
+  const assets = [['/about.html', /text\/html/], ['/forms/TNDO-A20.pdf', /application\/pdf/], ['/forms/TNDO-A40.svg', /image\/svg\+xml/], ['/forms/TNDO-3P-2026.pdf', /application\/pdf/], ['/forms/TNDO-3P-2026.png', /image\/png/], ['/vendor/opencv-4.11.0.js', /javascript/]];
+  for (const [path, contentType] of assets) {
+    const response = await page.request.get(`http://127.0.0.1:4176${path}`);
+    assert.equal(response.status(), 200, `${path} status`);
+    // Vite's SPA fallback also returns 200 HTML, so check the real asset type.
+    assert.match(response.headers()['content-type'] ?? '', contentType, `${path} content-type`);
+  }
   assert.deepEqual(errors, []); await mkdir('artifacts', { recursive: true }); await page.screenshot({ path: 'artifacts/tn-do-cloud-login.png' });
   await writeFile('artifacts/cloud-ui-check.json', JSON.stringify({ checked_at: new Date().toISOString(), cloud_login_rendered: true, branding: 'TN - DO', printable_forms_reachable: true, errors }, null, 2));
   console.log('PASS actual .env activates Supabase login; TN - DO branding and A4 forms are served. No account created or emails sent.');

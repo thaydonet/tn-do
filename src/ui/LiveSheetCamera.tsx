@@ -54,13 +54,16 @@ export function LiveSheetCamera({ template, onCapture, close, fallback, waitForR
         if (!disposed) { setError(e instanceof Error ? e.message : String(e)); setProcessing(false); stop(); }
         return;
       } finally {
-        if (!disposed && stream?.active) timer = setTimeout(() => void tick(), 180);
+        if (!disposed && stream?.active) timer = setTimeout(() => void tick(), 100);
       }
     };
     void (async () => {
       try {
         if (!navigator.mediaDevices?.getUserMedia) throw new Error('Camera trực tiếp cần HTTPS và trình duyệt hỗ trợ camera. Bạn có thể dùng camera hệ thống hoặc chọn ảnh.');
-        stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 2560 } } });
+        stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 2560 } } }).catch(async () => {
+          // Fallback: request any camera if environment/rear camera not available
+          return navigator.mediaDevices.getUserMedia({ audio: false, video: { width: { ideal: 1920 }, height: { ideal: 2560 } } });
+        });
         if (disposed) { stop(); return; }
         video.srcObject = stream; await video.play(); await loadOpenCV();
         if (!disposed) { setMessage('Đưa 4 ô đen trên phiếu vào đúng 4 ô vuông.'); void tick(); }
